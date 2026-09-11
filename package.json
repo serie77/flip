@@ -2,7 +2,7 @@
   "name": "flip-terminal",
   "private": true,
   "scripts": {
-    "build": "node build.js",
+    "site": "node build.js",
     "dev": "node dev.js"
   },
   "dependencies": {
