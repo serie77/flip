@@ -47,7 +47,7 @@ async function config() {
   if (memo.cfg && fresh(memo.cfgAt, 15e3)) return memo.cfg;
   let stored = null;
   try { stored = await getConfig(); } catch (e) { /* store down: keep last/default */ }
-  const cfg = stored && stored.ca ? stored : { ca: CA_DEFAULT };
+  const cfg = stored && 'ca' in stored ? stored : { ca: CA_DEFAULT }; // ca:null = deliberately cleared (not launched)
   if (cfg.ca !== memo.ca) { memo.ca = cfg.ca; memo.pool = null; memo.meta = null; memo.supply = null; }
   memo.cfg = cfg; memo.cfgAt = Date.now();
   return cfg;
@@ -131,6 +131,7 @@ module.exports = async (req, res) => {
   try {
     if (!KEY) return send(500, { error: 'server not configured' });
     const cfg = await config();
+    if (!cfg.ca) return send(200, { mc: 0, ca: null, status: 'not launched', ts: Date.now() }, true);
     const p = await pool(cfg);
     if (!p) return send(200, { mc: 0, ca: cfg.ca, status: 'waiting for pool', ts: Date.now() }, true);
     const m = await meta(cfg.ca, p);

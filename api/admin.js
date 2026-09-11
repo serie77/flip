@@ -39,6 +39,7 @@ module.exports = async (req, res) => {
     }
     if (req.method !== 'POST') return send(405, { error: 'method not allowed' });
     const b = await readJson(req);
+    if (b.clear) { const cfg = { ca: null, updatedAt: new Date().toISOString() }; await setConfig(cfg); return send(200, { ok: true, config: cfg, persistent: persistent() }); }
     const ca = String(b.ca || '').trim().toLowerCase();
     if (!/^0x[0-9a-f]{40}$/.test(ca)) return send(400, { error: 'ca must be a 0x-prefixed 40-hex address' });
     const cfg = { ca, updatedAt: new Date().toISOString() };

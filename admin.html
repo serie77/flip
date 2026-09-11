@@ -50,6 +50,7 @@
   </details>
   <div class="row">
     <button type="button" id="load">check status</button>
+    <button type="button" id="clear">clear · not launched</button>
     <button type="submit" class="primary" id="save">start tracking</button>
   </div>
   <div id="checks"></div>
@@ -71,7 +72,7 @@ $('#load').onclick=async()=>{
     h+=row(c.alchemyKey?'ok':'bad','alchemy key',c.alchemyKey?'set':'ALCHEMY_KEY missing');
     h+=row(c.rpc&&c.rpc.ok?'ok':'bad','chain reachable',c.rpc&&c.rpc.ok?`${c.rpc.network} · chainId ${c.rpc.chainId}`:(c.rpc&&c.rpc.error)||'no response');
     h+=row(c.store&&c.store.ok?'ok':(c.store&&c.store.configured?'bad':'warn'),'redis store',c.store&&c.store.ok?`connected via ${c.store.via}`:(c.store&&c.store.configured?('configured but failing: '+(c.store.error||'ping failed')):'not attached — settings will NOT persist'));
-    h+=row(j.config?'ok':'warn','tracked contract',j.config?`${j.config.ca} · set ${j.config.updatedAt}`:'none saved yet — using the deploy default');
+    h+=row(j.config?'ok':'warn','tracked contract',j.config?(j.config.ca?`${j.config.ca} · set ${j.config.updatedAt}`:`cleared · not launched (since ${j.config.updatedAt})`):'none saved yet — using the deploy default');
     let feed='';
     try{ const m=await (await fetch('/api/mcap',{cache:'no-store'})).json();
       feed = m.mc>0 ? row('ok','live feed',`${m.symbol||''} ${fmt(m.mc)} · ${m.version} pool · ${m.source}`)
@@ -81,6 +82,16 @@ $('#load').onclick=async()=>{
     if(j.config){ $('#ca').value=j.config.ca||''; $('#pool').value=j.config.pool||''; $('#version').value=j.config.version||''; $('#quote').value=j.config.quote||''; }
     const allOk=c.adminSecret&&c.alchemyKey&&c.rpc&&c.rpc.ok&&c.store&&c.store.ok;
     show(allOk?'ok':'', allOk?'everything is ready':'fix the items marked ✕ / ! above');
+  }catch(e){show('err','network error');}
+};
+$('#clear').onclick=async()=>{
+  if(!confirm('Clear the contract? The site will show "Not launched" until you set one.')) return;
+  show('','clearing…');
+  try{
+    const r=await fetch('/api/admin',{method:'POST',headers:auth(),body:JSON.stringify({clear:true})}); const j=await r.json();
+    if(!r.ok) return show('err',j.error||'failed');
+    $('#ca').value='';
+    show(j.persistent?'ok':'err','cleared — the site shows "Not launched" within ~20 seconds'+(j.persistent?'':'\n\nWARNING: no Redis store attached — this will NOT persist.'));
   }catch(e){show('err','network error');}
 };
 $('#f').onsubmit=async e=>{

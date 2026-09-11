@@ -481,7 +481,8 @@
    this is only the fallback shown before the first feed response ===== */
 const QS=new URLSearchParams(location.search);
 let CA = QS.get('ca') || '0x83d38b519308fe02158f043952b58a6b16a4a30e';
-const showCA=()=>{$('#caText').textContent=CA.slice(0,6)+'…'+CA.slice(-5);};
+let notLaunched=false;
+const showCA=()=>{$('#caText').textContent=CA?CA.slice(0,6)+'…'+CA.slice(-5):'CA · SOON';};
 const T=1e12,B=1e9,M=1e6,K=1e3;
 const S=(s,n,c)=>({id:'s-'+s,sym:s,name:n,cap:c,type:'stock'});
 const F=(s,n,c,fl)=>({id:'f-'+s,sym:s,name:n,cap:c,type:'fx',flag:fl});
@@ -917,7 +918,7 @@ function buildTape(upcoming){
 
 /* ================= animated market-cap counter ================= */
 let mcShown=null, mcAnim;
-function setMCText(v){const s=fmt(v); $('#mc').textContent=s; $('#hmc').textContent=s;}
+function setMCText(v){const s=fmt(v); $('#mc').textContent=notLaunched?'—':s; $('#hmc').textContent=notLaunched?'Not launched':s;}
 function animateMC(){
   if(REDUCED||mcShown===null){mcShown=mc; setMCText(mc); return;}
   cancelAnimationFrame(mcAnim);
@@ -1023,6 +1024,11 @@ async function poll(){
     const r=await fetch(API,{cache:'no-store'});
     if(!r.ok) return;
     const j=await r.json();
+    if(j.status==='not launched'){
+      if(!notLaunched||CA){notLaunched=true; CA=''; showCA(); live=false; $('#badge').hidden=true; mc=0; update();}
+      return;
+    }
+    if(notLaunched){notLaunched=false;}
     if(j.ca&&j.ca!==CA){CA=j.ca; showCA();}
     if(!(j.mc>0)) return;
     if(!live){
@@ -1059,6 +1065,7 @@ $('#sound').addEventListener('click',()=>{
   $('#sound').classList.toggle('on',soundOn);
 });
 $('#caBtn').addEventListener('click',async()=>{
+  if(!CA){toast(`${icon('check')} <span>not launched yet — CA coming soon</span>`); return;}
   try{await navigator.clipboard.writeText(CA);}catch(e){}
   toast(`${icon('check')} <span>contract address copied</span>`);
 });
