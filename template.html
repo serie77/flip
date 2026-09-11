@@ -471,10 +471,11 @@
 
 <script>
 /* ================= data ================= */
-/* ===== LAUNCH CONFIG — the contract shown in the header / copied by the CA button.
-   The live market-cap feed is configured server-side (api/mcap.js + Vercel env vars). ===== */
+/* ===== the tracked contract is set by the owner at /admin and served by /api/mcap;
+   this is only the fallback shown before the first feed response ===== */
 const QS=new URLSearchParams(location.search);
-const CA = QS.get('ca') || '0x83d38b519308fe02158f043952b58a6b16a4a30e';
+let CA = QS.get('ca') || '0x83d38b519308fe02158f043952b58a6b16a4a30e';
+const showCA=()=>{$('#caText').textContent=CA.slice(0,6)+'…'+CA.slice(-5);};
 const T=1e12,B=1e9,M=1e6,K=1e3;
 const S=(s,n,c)=>({id:'s-'+s,sym:s,name:n,cap:c,type:'stock'});
 const F=(s,n,c,fl)=>({id:'f-'+s,sym:s,name:n,cap:c,type:'fx',flag:fl});
@@ -1016,6 +1017,7 @@ async function poll(){
     const r=await fetch(API,{cache:'no-store'});
     if(!r.ok) return;
     const j=await r.json();
+    if(j.ca&&j.ca!==CA){CA=j.ca; showCA();}
     if(!(j.mc>0)) return;
     if(!live){
       live=true;
@@ -1192,7 +1194,7 @@ new ResizeObserver(()=>{if(laneLast.length) renderLane(laneLast);}).observe(lane
 })();
 
 for(const x of $('#tabs').children) x.classList.toggle('on',x.dataset.f===filter);
-$('#caText').textContent=CA.slice(0,6)+'…'+CA.slice(-5);
+showCA();
 if(QS.has('sim')){ $('#simCtl').classList.remove('hidden'); $('#badge').textContent='SIM'; mc=Math.pow(10,+$('#slider').value); } // dev-only: ?sim shows the scrub slider
 layout(); update();
 </script>

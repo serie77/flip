@@ -10,10 +10,13 @@ try {
   }
 } catch (e) {}
 const mcap = require('./api/mcap.js');
+const admin = require('./api/admin.js');
 const port = Number(process.env.PORT || 3000);
 http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://x');
   if (url.pathname === '/api/mcap') return mcap(req, res);
+  if (url.pathname === '/api/admin') return admin(req, res);
+  if (url.pathname === '/admin' || url.pathname === '/admin.html') { res.setHeader('content-type', 'text/html; charset=utf-8'); return fs.createReadStream(path.join(__dirname, 'admin.html')).pipe(res); }
   if (url.pathname === '/' || url.pathname === '/index.html') {
     res.setHeader('content-type', 'text/html; charset=utf-8');
     return fs.createReadStream(path.join(__dirname, 'index.html')).pipe(res);

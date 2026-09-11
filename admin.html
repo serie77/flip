@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>FLIP Admin</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;900&family=IBM+Plex+Mono:wght@400;600;700&display=swap">
+<style>
+  :root{--bg:#070a12; --panel:#111827; --line:#1c2438; --line2:#26304a; --text:#e9eef9; --muted:#76829f; --flip:#12e695; --gold:#ffd75e; --amber:#ffb02e; --down:#ff5c5c}
+  *{box-sizing:border-box; margin:0}
+  body{min-height:100vh; display:grid; place-items:center; background:radial-gradient(900px 500px at 20% 0%, rgba(18,230,149,.08), transparent 60%), var(--bg); color:var(--text); font-family:'Archivo',system-ui,sans-serif; padding:24px}
+  .box{width:min(520px,100%); background:linear-gradient(165deg,var(--panel),#0b101d); border:1px solid var(--line2); border-radius:18px; padding:28px 30px; box-shadow:0 30px 80px rgba(0,0,0,.5)}
+  h1{font-weight:900; font-size:26px; letter-spacing:.01em} h1 em{font-style:normal; color:var(--flip)}
+  .sub{font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.22em; text-transform:uppercase; color:var(--muted); margin:6px 0 22px}
+  label{display:block; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); margin:14px 0 6px}
+  input{width:100%; font-family:'IBM Plex Mono',monospace; font-size:13px; color:var(--text); background:#0a0f1b; border:1px solid var(--line2); border-radius:9px; padding:11px 12px; outline:none}
+  input:focus{border-color:var(--flip)}
+  details{margin-top:14px} summary{font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); cursor:pointer}
+  .row{display:flex; gap:10px; margin-top:22px}
+  button{flex:1; font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.06em; padding:12px; border-radius:9px; border:1px solid var(--line2); background:var(--panel); color:var(--text); cursor:pointer}
+  button.primary{background:var(--flip); color:#05301f; border-color:var(--flip); font-weight:700}
+  button:disabled{opacity:.5; cursor:wait}
+  #out{margin-top:18px; font-family:'IBM Plex Mono',monospace; font-size:12px; line-height:1.6; color:var(--muted); white-space:pre-wrap; word-break:break-all}
+  #out.ok{color:var(--flip)} #out.err{color:var(--down)}
+  a{color:var(--gold)}
+</style>
+</head>
+<body>
+<form class="box" id="f">
+  <h1>FL<em>I</em>P admin</h1>
+  <div class="sub">point the terminal at a contract</div>
+  <label for="secret">admin secret</label>
+  <input id="secret" type="password" autocomplete="current-password" required>
+  <label for="ca">contract address (robinhood chain)</label>
+  <input id="ca" placeholder="0x…" pattern="^0x[0-9a-fA-F]{40}$" required>
+  <details>
+    <summary>advanced · pool override (optional)</summary>
+    <label for="pool">pool id (v4, 32 bytes) or pool address (v2/v3)</label>
+    <input id="pool" placeholder="leave empty to auto-discover">
+    <label for="version">version (v2 / v3 / v4)</label>
+    <input id="version" placeholder="v4">
+    <label for="quote">quote token address (0x0 = native ETH)</label>
+    <input id="quote" placeholder="0x0000000000000000000000000000000000000000">
+  </details>
+  <div class="row">
+    <button type="button" id="load">load current</button>
+    <button type="submit" class="primary" id="save">start tracking</button>
+  </div>
+  <div id="out"></div>
+</form>
+<script>
+const $=q=>document.querySelector(q), out=$('#out');
+const auth=()=>({authorization:'Bearer '+$('#secret').value, 'content-type':'application/json'});
+function show(cls,msg){out.className=cls; out.textContent=msg;}
+$('#load').onclick=async()=>{
+  try{
+    const r=await fetch('/api/admin',{headers:auth()}); const j=await r.json();
+    if(!r.ok) return show('err',j.error||'failed');
+    if(j.config){ $('#ca').value=j.config.ca||''; $('#pool').value=j.config.pool||''; $('#version').value=j.config.version||''; $('#quote').value=j.config.quote||''; }
+    show('ok',(j.config?'tracking '+j.config.ca+'\nset '+j.config.updatedAt:'no contract set yet — using the deploy default')+(j.persistent?'':'\n(warning: no Redis store configured; this will not persist)'));
+  }catch(e){show('err','network error');}
+};
+$('#f').onsubmit=async e=>{
+  e.preventDefault(); $('#save').disabled=true; show('', 'saving…');
+  try{
+    const body={ca:$('#ca').value.trim()};
+    if($('#pool').value.trim()){body.pool=$('#pool').value.trim(); body.version=$('#version').value.trim()||'v4'; body.quote=$('#quote').value.trim();}
+    const r=await fetch('/api/admin',{method:'POST',headers:auth(),body:JSON.stringify(body)}); const j=await r.json();
+    if(!r.ok) return show('err',j.error||'failed');
+    show('ok','tracking '+j.config.ca+'\nthe site switches over within ~20 seconds'+(j.persistent?'':'\n(warning: no Redis store configured; this will not persist)'));
+  }catch(e){show('err','network error');}
+  finally{$('#save').disabled=false;}
+};
+</script>
+</body>
+</html>
