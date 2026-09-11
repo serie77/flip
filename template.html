@@ -87,6 +87,10 @@
   .ca:hover{color:var(--text); border-color:var(--line2)}
   .ca:focus-visible{outline:2px solid var(--flip)}
 
+  .xlink{display:flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:8px; background:var(--panel2); border:1px solid var(--line); color:var(--muted); transition:color .15s, border-color .15s}
+  .xlink:hover{color:var(--text); border-color:var(--line2)}
+  .xlink:focus-visible{outline:2px solid var(--flip)}
+  .xlink svg{width:15px; height:15px; fill:currentColor}
   #sound{
     all:unset; cursor:pointer; width:36px; height:36px;
     display:flex; align-items:center; justify-content:center;
@@ -415,6 +419,7 @@
       <input id="slider" type="range" min="4" max="13.75" step="0.01" value="4.96" aria-label="Simulate market cap">
     </div>
     <button class="ca mono" id="caBtn" title="Copy contract address"><span id="caText"></span><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 012-2h9"/></svg></button>
+    <a class="xlink" href="https://x.com/Fliptheuniverse" target="_blank" rel="noopener" title="$FLIP on X" aria-label="$FLIP on X"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
     <button id="sound" title="Toggle sound"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16.5 8.5a5 5 0 010 7"/><path class="slash" d="M17 10l4 4M21 10l-4 4"/></svg></button>
   </div>
 </header>
