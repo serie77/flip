@@ -10,7 +10,7 @@
   :root{--bg:#070a12; --panel:#111827; --line:#1c2438; --line2:#26304a; --text:#e9eef9; --muted:#76829f; --flip:#12e695; --gold:#ffd75e; --amber:#ffb02e; --down:#ff5c5c}
   *{box-sizing:border-box; margin:0}
   body{min-height:100vh; display:grid; place-items:center; background:radial-gradient(900px 500px at 20% 0%, rgba(18,230,149,.08), transparent 60%), var(--bg); color:var(--text); font-family:'Archivo',system-ui,sans-serif; padding:24px}
-  .box{width:min(520px,100%); background:linear-gradient(165deg,var(--panel),#0b101d); border:1px solid var(--line2); border-radius:18px; padding:28px 30px; box-shadow:0 30px 80px rgba(0,0,0,.5)}
+  .box{width:min(560px,100%); background:linear-gradient(165deg,var(--panel),#0b101d); border:1px solid var(--line2); border-radius:18px; padding:28px 30px; box-shadow:0 30px 80px rgba(0,0,0,.5)}
   h1{font-weight:900; font-size:26px; letter-spacing:.01em} h1 em{font-style:normal; color:var(--flip)}
   .sub{font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.22em; text-transform:uppercase; color:var(--muted); margin:6px 0 22px}
   label{display:block; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); margin:14px 0 6px}
@@ -23,7 +23,12 @@
   button:disabled{opacity:.5; cursor:wait}
   #out{margin-top:18px; font-family:'IBM Plex Mono',monospace; font-size:12px; line-height:1.6; color:var(--muted); white-space:pre-wrap; word-break:break-all}
   #out.ok{color:var(--flip)} #out.err{color:var(--down)}
-  a{color:var(--gold)}
+  #checks{margin-top:18px; display:none; flex-direction:column; gap:6px; font-family:'IBM Plex Mono',monospace; font-size:12px}
+  #checks.show{display:flex}
+  .chk{display:flex; gap:10px; align-items:baseline; padding:8px 10px; border-radius:8px; background:rgba(255,255,255,.03); border-left:3px solid var(--line2)}
+  .chk.ok{border-left-color:var(--flip)} .chk.bad{border-left-color:var(--down)} .chk.warn{border-left-color:var(--amber)}
+  .chk b{width:14px; flex:none} .chk.ok b{color:var(--flip)} .chk.bad b{color:var(--down)} .chk.warn b{color:var(--amber)}
+  .chk span{color:var(--muted)} .chk span em{font-style:normal; color:var(--text)}
 </style>
 </head>
 <body>
@@ -44,21 +49,38 @@
     <input id="quote" placeholder="0x0000000000000000000000000000000000000000">
   </details>
   <div class="row">
-    <button type="button" id="load">load current</button>
+    <button type="button" id="load">check status</button>
     <button type="submit" class="primary" id="save">start tracking</button>
   </div>
+  <div id="checks"></div>
   <div id="out"></div>
 </form>
 <script>
-const $=q=>document.querySelector(q), out=$('#out');
+const $=q=>document.querySelector(q), out=$('#out'), checks=$('#checks');
 const auth=()=>({authorization:'Bearer '+$('#secret').value, 'content-type':'application/json'});
 function show(cls,msg){out.className=cls; out.textContent=msg;}
+const fmt=v=>v>=1e9?'$'+(v/1e9).toFixed(2)+'B':v>=1e6?'$'+(v/1e6).toFixed(2)+'M':v>=1e3?'$'+(v/1e3).toFixed(1)+'K':'$'+Math.round(v);
+function row(state,label,detail){return `<div class="chk ${state}"><b>${state==='ok'?'✓':state==='warn'?'!':'✕'}</b><span><em>${label}</em>${detail?' · '+detail:''}</span></div>`;}
 $('#load').onclick=async()=>{
+  show('','checking…'); checks.className=''; checks.innerHTML='';
   try{
     const r=await fetch('/api/admin',{headers:auth()}); const j=await r.json();
     if(!r.ok) return show('err',j.error||'failed');
+    const c=j.checks||{}; let h='';
+    h+=row(c.adminSecret?'ok':'bad','admin secret',c.adminSecret?'set':'ADMIN_SECRET missing');
+    h+=row(c.alchemyKey?'ok':'bad','alchemy key',c.alchemyKey?'set':'ALCHEMY_KEY missing');
+    h+=row(c.rpc&&c.rpc.ok?'ok':'bad','chain reachable',c.rpc&&c.rpc.ok?`${c.rpc.network} · chainId ${c.rpc.chainId}`:(c.rpc&&c.rpc.error)||'no response');
+    h+=row(c.store&&c.store.ok?'ok':(c.store&&c.store.configured?'bad':'warn'),'redis store',c.store&&c.store.ok?`connected via ${c.store.via}`:(c.store&&c.store.configured?('configured but failing: '+(c.store.error||'ping failed')):'not attached — settings will NOT persist'));
+    h+=row(j.config?'ok':'warn','tracked contract',j.config?`${j.config.ca} · set ${j.config.updatedAt}`:'none saved yet — using the deploy default');
+    let feed='';
+    try{ const m=await (await fetch('/api/mcap',{cache:'no-store'})).json();
+      feed = m.mc>0 ? row('ok','live feed',`${m.symbol||''} ${fmt(m.mc)} · ${m.version} pool · ${m.source}`)
+           : row('warn','live feed', m.status ? `${m.ca} · ${m.status}` : (m.error||'unavailable')+(m.detail?' · '+m.detail:''));
+    }catch(e){ feed=row('bad','live feed','unreachable'); }
+    checks.innerHTML=h+feed; checks.className='show';
     if(j.config){ $('#ca').value=j.config.ca||''; $('#pool').value=j.config.pool||''; $('#version').value=j.config.version||''; $('#quote').value=j.config.quote||''; }
-    show('ok',(j.config?'tracking '+j.config.ca+'\nset '+j.config.updatedAt:'no contract set yet — using the deploy default')+(j.persistent?'':'\n(warning: no Redis store configured; this will not persist)'));
+    const allOk=c.adminSecret&&c.alchemyKey&&c.rpc&&c.rpc.ok&&c.store&&c.store.ok;
+    show(allOk?'ok':'', allOk?'everything is ready':'fix the items marked ✕ / ! above');
   }catch(e){show('err','network error');}
 };
 $('#f').onsubmit=async e=>{
@@ -68,7 +90,7 @@ $('#f').onsubmit=async e=>{
     if($('#pool').value.trim()){body.pool=$('#pool').value.trim(); body.version=$('#version').value.trim()||'v4'; body.quote=$('#quote').value.trim();}
     const r=await fetch('/api/admin',{method:'POST',headers:auth(),body:JSON.stringify(body)}); const j=await r.json();
     if(!r.ok) return show('err',j.error||'failed');
-    show('ok','tracking '+j.config.ca+'\nthe site switches over within ~20 seconds'+(j.persistent?'':'\n(warning: no Redis store configured; this will not persist)'));
+    show(j.persistent?'ok':'err','tracking '+j.config.ca+'\nthe site switches over within ~20 seconds'+(j.persistent?'':'\n\nWARNING: no Redis store attached — this will NOT persist.\nVercel → Storage → create/connect Redis → redeploy, then save again.'));
   }catch(e){show('err','network error');}
   finally{$('#save').disabled=false;}
 };

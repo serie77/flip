@@ -1,23 +1,39 @@
 // Shared config store for the serverless functions (files starting with "_" are not exposed as routes).
-// Production: Upstash Redis (Vercel Storage → Redis; env vars are added automatically).
+// Production: Upstash Redis attached via Vercel Storage. Vercel injects the REST credentials with a
+// prefix you choose in the connect dialog (KV_, STORAGE_, …) — any prefix is detected automatically.
 // Local dev without Redis: a JSON file in the OS temp dir (not persistent on Vercel — dev only).
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
 
 const KEY = 'flip:config';
-const URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
-const TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
 const FILE = path.join(os.tmpdir(), 'flip-config.json');
 
+function creds() {
+  const e = process.env;
+  if (e.UPSTASH_REDIS_REST_URL && e.UPSTASH_REDIS_REST_TOKEN) return { url: e.UPSTASH_REDIS_REST_URL, token: e.UPSTASH_REDIS_REST_TOKEN, via: 'UPSTASH_REDIS_REST_*' };
+  for (const k of Object.keys(e)) {
+    const m = k.match(/^(.*)REST_API_URL$/);
+    if (m && e[k] && e[m[1] + 'REST_API_TOKEN']) return { url: e[k], token: e[m[1] + 'REST_API_TOKEN'], via: m[1] + 'REST_API_*' };
+  }
+  return null;
+}
+
 async function redis(cmd) {
-  const r = await fetch(URL, { method: 'POST', headers: { authorization: 'Bearer ' + TOKEN, 'content-type': 'application/json' }, body: JSON.stringify(cmd) });
+  const c = creds();
+  const r = await fetch(c.url, { method: 'POST', headers: { authorization: 'Bearer ' + c.token, 'content-type': 'application/json' }, body: JSON.stringify(cmd) });
   const j = await r.json();
   if (j.error) throw new Error('store: ' + j.error);
   return j.result;
 }
 
-const persistent = () => Boolean(URL && TOKEN);
+const persistent = () => Boolean(creds());
+const storeName = () => (creds() || {}).via || 'temp file (dev only)';
+
+async function ping() {
+  if (!persistent()) return false;
+  return (await redis(['PING'])) === 'PONG';
+}
 
 async function getConfig() {
   if (persistent()) {
@@ -41,4 +57,4 @@ async function readJson(req) {
   try { return raw ? JSON.parse(raw) : {}; } catch (e) { return {}; }
 }
 
-module.exports = { getConfig, setConfig, persistent, readJson };
+module.exports = { getConfig, setConfig, persistent, storeName, ping, readJson };
