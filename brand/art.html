@@ -50,6 +50,19 @@
   body.pfp .sub{margin-top:14vmin; font-weight:700; font-size:3.2vmin; letter-spacing:.34em; padding-left:.34em; color:#ffd75e; text-shadow:0 0 24px rgba(255,215,94,.35)}
   body.pfp .tick{position:absolute; left:50%; bottom:9%; transform:translateX(-50%); font-weight:500; font-size:2vmin; letter-spacing:.3em; color:#4a5570}
 
+  /* ---- pfp: giant F (circle-safe) ---- */
+  body.pfpf .mark{position:absolute; left:50%; top:50%; transform:translate(-46%,-54%); font-weight:900; font-size:92vmin; line-height:.8; letter-spacing:-.02em}
+  body.pfpf .wm .fill{background:linear-gradient(180deg,#b6fbe0 0%,#12e695 46%,#0fbd7b 54%,#7cf0c4 62%,#0a9c66 100%); -webkit-background-clip:text; background-clip:text}
+  body.pfpf .wm .ghost{-webkit-text-stroke:3px rgba(18,230,149,.3); transform:translate(.05em,.05em)}
+  body.pfpf .wm .glow{color:rgba(18,230,149,.55); filter:blur(40px); opacity:.8}
+  body.pfpf .wm .refl{display:none}
+  body.pfpf .dot{position:absolute; left:50%; top:50%; transform:translate(22vmin,-30vmin); width:9vmin; height:9vmin; border-radius:50%; background:linear-gradient(180deg,#fff,#c3cfea); box-shadow:0 0 30px rgba(255,255,255,.35)}
+  /* ---- pfp: wordmark only (circle-safe) ---- */
+  body.pfpw .mark{position:absolute; left:50%; top:50%; transform:translate(-50%,-52%); font-weight:900; font-size:31vmin; line-height:.9; letter-spacing:-.045em}
+  body.pfpw .wm .refl{display:none}
+  body.pfpw .wm .ghost{-webkit-text-stroke:2.5px rgba(255,255,255,.22)}
+  body.pfpw .sub{position:absolute; left:50%; top:50%; transform:translate(-50%,13vmin); font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:2.9vmin; letter-spacing:.34em; padding-left:.34em; color:#ffd75e; text-transform:uppercase}
+
   /* ---- banner ---- */
   body.banner .text{position:absolute; left:6vw; top:50%; transform:translateY(-55%); display:flex; flex-direction:column; gap:2vh}
   body.banner .eyebrow{font-weight:700; font-size:2.4vh; letter-spacing:.34em; color:#ffd75e; display:flex; gap:1.6vh; align-items:center}
@@ -79,12 +92,15 @@ const mode=new URLSearchParams(location.search).get('mode')||'pfp';
 document.body.classList.add(mode);
 const wm=(txt,em)=>`<div class="wm ${em?'em':''}"><span class="glow">${txt}</span><span class="ghost">${txt}</span><span class="fill">${txt}</span><span class="refl">${txt}</span></div>`;
 const ui=document.getElementById('ui');
-if(mode==='pfp'){
+if(mode==='pfpf'){
+  ui.innerHTML=`<div class="mark">${wm('F',true)}</div><div class="dot"></div>`;
+}else if(mode==='pfpw'){
+  ui.innerHTML=`<div class="mark">${wm('FL<em>I</em>P')}</div><div class="sub">flip the universe</div>`;
+}else if(mode==='pfp'){
   ui.innerHTML=`<div class="stack">${wm('FL<em>I</em>P')}<div class="sub mono">flip the universe</div></div><div class="tick mono">$flip · robinhood chain</div>`;
 }else{
-  ui.innerHTML=`<div class="big">FL<em>I</em>P</div><div class="text">
-    <div class="eyebrow mono"><i></i>$flip · robinhood chain</div>
-    <div class="hl">${wm('FLIP THE')}${wm('UNIVERSE.',true)}</div>
+  ui.innerHTML=`<div class="big">FL<em>I</em>P</div><div class="text"><div class="hl">${wm("FLIP THE")}${wm("UNIVERSE.",true)}</div></div>`;
+}${wm('UNIVERSE.',true)}</div>
     <div class="sub mono"><b>every company.</b> <b>every currency.</b> one coin.</div>
   </div><div class="ca mono">flip.terminal · live</div>`;
 }

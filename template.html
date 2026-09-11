@@ -104,7 +104,7 @@
   #queue h2 .ic{width:12px; height:12px; vertical-align:-2px; margin-right:5px}
   .ca .ic{width:12px; height:12px; vertical-align:-2px; margin-left:3px}
 
-  /* ================= main (hero) view — FLIP.TERMINAL ================= */
+  /* ================= main (hero) view ================= */
   #hero{position:absolute; inset:72px 0 46px 0; display:none; overflow:hidden}
   body.main-view #hero{display:block}
   body.main-view #map, body.main-view #queue{display:none}
@@ -427,7 +427,7 @@
   <div class="vig"></div>
   <div class="stage">
     <div class="col">
-      <div class="eyebrow"><i></i>flip.terminal · live on robinhood chain</div>
+      <div class="eyebrow"><i></i>live on robinhood chain</div>
       <h1 class="hl"><span class="gl" data-t="FLIP THE">FLIP THE<i class="ghost">FLIP THE</i></span><span class="gl em" data-t="UNIVERSE.">UNIVERSE.<i class="ghost">UNIVERSE.</i></span></h1>
       <p class="lore">$FLIP is the coin out to flip the universe — <b>every company</b> and <b>every currency</b> on Earth, from <b id="loreMin"></b> to <b id="loreMax"></b>. Every target's market cap is pulled from the real world at every build. No roadmap. Only targets.</p>
       <div class="mcpanel">
@@ -1076,7 +1076,7 @@ let rT;
 new ResizeObserver(()=>{clearTimeout(rT);rT=setTimeout(layout,100)}).observe(map);
 addEventListener('load',layout);
 
-/* ================= FLIP.TERMINAL hero ================= */
+/* ================= hero ================= */
 const BUILT='__BUILT__';
 {
   const minS=[...DATA].reverse().find(d=>d.type==='stock'), maxF=DATA.find(d=>d.type==='fx');
@@ -1142,7 +1142,7 @@ new ResizeObserver(()=>{if(laneLast.length) renderLane(laneLast);}).observe(lane
   try{if(sessionStorage.getItem('flipBooted')) return;}catch(e){}
   const el=$('#boot'), box=$('#bootLines'); let i=0, done=false;
   const L=[
-    ['INITIALIZING FLIP.TERMINAL','acc'],
+    ['INITIALIZING $FLIP','acc'],
     ['ESTABLISHING UPLINK TO ROBINHOOD CHAIN','ok','OK'],
     ['TARGET.DATABASE','ok',DATA.length+' ENTITIES LOADED'],
     ['LIVE.CAPS','ok','VERIFIED '+BUILT],
