@@ -51,7 +51,7 @@ const html = `<!doctype html>
     <div class="wm"><span class="glow">FLIP THE <em>UNIVERSE.</em></span><span class="ghost">FLIP THE <em>UNIVERSE.</em></span><span class="fill">FLIP THE <em>UNIVERSE.</em></span></div>
     <div class="sub"><b>${stocks.length} companies</b> · <b>${fxCount} currencies</b><br>one coin · $flip</div>
   </div>
-  <div class="grid">${chips}<span class="coin" title="$FLIP">F</span></div>
+  <div class="grid">${chips}</div>
 </div>
 <div class="grain"></div>
 </body></html>`;
