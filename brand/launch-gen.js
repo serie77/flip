@@ -24,20 +24,20 @@ const html = `<!doctype html>
       linear-gradient(180deg,#0c1322,#05070d); position:relative}
   .grid-bg{position:absolute; inset:0; background:radial-gradient(rgba(255,255,255,.07) 1px, transparent 1.2px) 0 0/28px 28px; mask-image:radial-gradient(75% 75% at 50% 50%, #000 30%, transparent 100%); -webkit-mask-image:radial-gradient(75% 75% at 50% 50%, #000 30%, transparent 100%)}
   .grain{position:absolute; inset:0; opacity:.06; mix-blend-mode:overlay; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
-  .panel{position:absolute; left:60px; top:60px; right:60px; bottom:60px; border-radius:34px; padding:54px 64px 60px;
+  .panel{position:absolute; left:44px; top:44px; right:44px; bottom:44px; border-radius:34px; padding:40px 64px 56px;
     background:linear-gradient(165deg, rgba(17,24,39,.92), rgba(11,16,29,.92)); border:1px solid rgba(38,48,74,.9);
     box-shadow:0 40px 120px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.05); display:flex; flex-direction:column}
-  .head{display:flex; align-items:flex-end; justify-content:space-between; gap:40px}
-  .wm{position:relative; font-weight:900; font-size:96px; line-height:.9; letter-spacing:-.04em; white-space:nowrap; display:inline-block}
+  .head{display:flex; align-items:center; justify-content:space-between; gap:40px; margin-bottom:24px}
+  .wm{position:relative; font-weight:900; font-size:90px; line-height:.9; letter-spacing:-.04em; white-space:nowrap; display:inline-block}
   .wm .fill{position:relative; z-index:2; color:transparent; background:linear-gradient(180deg,#ffffff 0%,#f4f7fc 38%,#aebbdc 50%,#f7f9fe 56%,#c3cfea 100%); -webkit-background-clip:text; background-clip:text}
   .wm .fill em{font-style:normal; color:transparent; background:linear-gradient(180deg,#b6fbe0 0%,#12e695 48%,#0fbd7b 54%,#7cf0c4 62%,#0a9c66 100%); -webkit-background-clip:text; background-clip:text}
   .wm .ghost{position:absolute; inset:0; z-index:1; color:transparent; -webkit-text-stroke:2px rgba(255,255,255,.2); transform:translate(.06em,.06em)}
   .wm .ghost em{font-style:normal; -webkit-text-stroke-color:rgba(18,230,149,.3)}
   .wm .glow{position:absolute; inset:0; z-index:0; color:rgba(18,230,149,.35); filter:blur(30px)}
   .wm .glow em{font-style:normal}
-  .sub{font-family:'IBM Plex Mono',monospace; font-size:15px; letter-spacing:.3em; text-transform:uppercase; color:#ffd75e; text-align:right; line-height:1.9; white-space:nowrap}
+  .sub{font-family:'IBM Plex Mono',monospace; font-size:14px; letter-spacing:.2em; text-transform:uppercase; color:#ffd75e; text-align:right; line-height:1.9; white-space:nowrap; padding:10px 18px; border:1px solid rgba(255,215,94,.25); border-radius:12px; background:rgba(255,215,94,.05)}
   .sub b{color:#f4f7fc; font-weight:700}
-  .grid{margin-top:auto; display:grid; grid-template-columns:repeat(16, 1fr); gap:30px 0; justify-items:center}
+  .grid{margin-top:auto; display:grid; grid-template-columns:repeat(16, 1fr); gap:20px 0; justify-items:center}
   ${chipCss}
   .chip{width:64px; height:64px; font-size:22px}
   .chip.logo{box-shadow:0 6px 18px rgba(0,0,0,.45), 0 0 0 2px rgba(255,255,255,.04)}
