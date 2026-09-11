@@ -386,7 +386,7 @@
   </div>
   <div class="hgroup">
     <div class="mcblock">
-      <span class="mclabel">$FLIP market cap <span id="badge" class="badge sim">PRE-LAUNCH · NO PAIR YET</span></span>
+      <span class="mclabel">$FLIP market cap <span id="badge" class="badge live" hidden>LIVE · ON-CHAIN</span></span>
       <span id="mc">$0</span>
     </div>
     <canvas id="spark" width="236" height="76"></canvas>
@@ -1021,7 +1021,7 @@ async function poll(){
     if(!(j.mc>0)) return;
     if(!live){
       live=true;
-      const b=$('#badge'); b.className='badge live'; b.textContent='LIVE · ON-CHAIN';
+      $('#badge').hidden=false;
       $('#simCtl').classList.add('hidden');
     }
     const prev=mc; mc=j.mc;
@@ -1195,7 +1195,7 @@ new ResizeObserver(()=>{if(laneLast.length) renderLane(laneLast);}).observe(lane
 
 for(const x of $('#tabs').children) x.classList.toggle('on',x.dataset.f===filter);
 showCA();
-if(QS.has('sim')){ $('#simCtl').classList.remove('hidden'); $('#badge').textContent='SIM'; mc=Math.pow(10,+$('#slider').value); } // dev-only: ?sim shows the scrub slider
+if(QS.has('sim')){ $('#simCtl').classList.remove('hidden'); const b=$('#badge'); b.hidden=false; b.className='badge sim'; b.textContent='SIM'; mc=Math.pow(10,+$('#slider').value); } // dev-only: ?sim shows the scrub slider
 layout(); update();
 </script>
 </body>
