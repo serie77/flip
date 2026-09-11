@@ -1,0 +1,1200 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>$FLIP Terminal</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%23083b2a'/><text x='50' y='73' font-size='62' font-weight='900' font-family='Arial,sans-serif' text-anchor='middle' fill='%2312e695'>F</text></svg>">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;900&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap">
+<style>
+  :root{
+    --bg:#070a12; --panel:#0c111e; --panel2:#111827; --glass:#101726;
+    --line:#1c2438; --line2:#26304a;
+    --text:#e9eef9; --muted:#76829f; --faint:#4a5570;
+    --flip:#12e695; --flip-soft:#7cf0c4; --flip-deep:#0a5c3f; --flip-glow:rgba(18,230,149,.28);
+    --gold:#ffd75e; --amber:#ffb02e; --amber-soft:rgba(255,176,46,.09);
+    --down:#ff5c5c;
+  }
+  *{box-sizing:border-box; margin:0}
+  html,body{height:100%}
+  body{
+    background:
+      radial-gradient(1100px 600px at 80% -12%, rgba(38,58,120,.16), transparent 60%),
+      radial-gradient(900px 700px at -8% 110%, rgba(96,52,150,.10), transparent 55%),
+      var(--bg);
+    color:var(--text);
+    font-family:'Archivo',system-ui,sans-serif;
+    overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--flip-deep); color:#fff}
+  .mono{font-family:'IBM Plex Mono',ui-monospace,monospace}
+
+  /* ================= header ================= */
+  header{
+    height:72px; display:flex; align-items:center; gap:0;
+    padding:0 16px; background:linear-gradient(180deg,#0e1424,#0b101d);
+    border-bottom:1px solid var(--line);
+  }
+  .hgroup{display:flex; align-items:center; gap:16px; padding:0 18px; height:44px}
+  .hgroup + .hgroup{border-left:1px solid var(--line)}
+  .hgroup:first-child{padding-left:2px}
+  .hgroup.grow{flex:1; min-width:0}
+  .hgroup.end{padding-right:2px}
+
+  .logo{display:flex; flex-direction:column; line-height:1}
+  .logo .word{font-weight:900; font-size:27px; letter-spacing:.02em}
+  .logo .word em{font-style:normal; color:var(--flip); text-shadow:0 0 18px var(--flip-glow)}
+  .logo small{color:var(--muted); font-size:9px; letter-spacing:.22em; text-transform:uppercase; margin-top:4px}
+
+  .mcblock{display:flex; flex-direction:column; gap:2px; min-width:196px}
+  .mclabel{font-size:9px; letter-spacing:.18em; color:var(--muted); text-transform:uppercase; display:flex; gap:8px; align-items:center}
+  .badge{font-family:'IBM Plex Mono',monospace; font-size:9px; padding:2px 7px; border-radius:99px; letter-spacing:.1em; border:1px solid transparent}
+  .badge.sim{background:var(--amber-soft); color:var(--amber); border-color:rgba(255,176,46,.3)}
+  .badge.live{background:rgba(18,230,149,.08); color:var(--flip); border-color:rgba(18,230,149,.35); animation:pulse 1.6s infinite}
+  #mc{
+    font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:27px;
+    font-variant-numeric:tabular-nums; color:var(--gold);
+    text-shadow:0 0 26px rgba(255,215,94,.28);
+  }
+  #spark{width:118px; height:38px; opacity:.95}
+
+  .stats{display:flex; gap:20px}
+  .stat{display:flex; flex-direction:column; gap:3px}
+  .stat b{font-family:'IBM Plex Mono',monospace; font-size:16px; font-variant-numeric:tabular-nums}
+  .stat span{font-size:9px; letter-spacing:.14em; color:var(--muted); text-transform:uppercase; white-space:nowrap}
+  .stat b.green{color:var(--flip)} .stat b.gold{color:var(--gold)}
+
+  .tabs{display:flex; gap:3px; background:var(--panel2); border:1px solid var(--line); border-radius:9px; padding:3px}
+  .tabs button{
+    all:unset; cursor:pointer; font-family:'IBM Plex Mono',monospace; font-size:10.5px;
+    padding:6px 11px; border-radius:6px; color:var(--muted); letter-spacing:.06em; transition:color .15s;
+  }
+  .tabs button:hover{color:var(--text)}
+  .tabs button:focus-visible{outline:2px solid var(--flip)}
+  .tabs button.on{background:var(--line2); color:var(--text)}
+
+  .sim{display:flex; flex-direction:column; gap:5px; width:150px}
+  .sim label{font-size:9px; letter-spacing:.16em; color:var(--muted); text-transform:uppercase}
+  .sim input{width:100%; accent-color:var(--flip); height:14px}
+  .sim.hidden{display:none}
+
+  .ca{
+    all:unset; cursor:pointer; font-family:'IBM Plex Mono',monospace; font-size:10.5px;
+    color:var(--muted); background:var(--panel2); border:1px solid var(--line);
+    padding:8px 11px; border-radius:8px; transition:color .15s, border-color .15s;
+  }
+  .ca:hover{color:var(--text); border-color:var(--line2)}
+  .ca:focus-visible{outline:2px solid var(--flip)}
+
+  #sound{
+    all:unset; cursor:pointer; width:36px; height:36px;
+    display:flex; align-items:center; justify-content:center;
+    border-radius:8px; background:var(--panel2); border:1px solid var(--line);
+    color:var(--muted); transition:color .15s, box-shadow .15s;
+  }
+  #sound svg{width:17px; height:17px}
+  #sound.on{color:var(--flip); border-color:var(--flip-deep); box-shadow:0 0 14px var(--flip-glow)}
+  #sound.on .slash{display:none}
+  #sound:focus-visible{outline:2px solid var(--flip)}
+
+  .ic{width:14px; height:14px; flex:none}
+  .toast .ic{width:16px; height:16px; color:var(--flip)}
+  .toast.down .ic{color:var(--amber)}
+  #queue h2 .ic{width:12px; height:12px; vertical-align:-2px; margin-right:5px}
+  .ca .ic{width:12px; height:12px; vertical-align:-2px; margin-left:3px}
+
+  /* ================= main (hero) view — FLIP.TERMINAL ================= */
+  #hero{position:absolute; inset:72px 0 46px 0; display:none; overflow:hidden}
+  body.main-view #hero{display:block}
+  body.main-view #map, body.main-view #queue{display:none}
+  #bgfx{position:absolute; inset:0; pointer-events:none}
+  .horb{position:absolute; border-radius:50%; filter:blur(80px); pointer-events:none}
+  .horb.a{width:520px; height:520px; background:rgba(18,230,149,.09); top:-160px; left:-120px; animation:orb 18s ease-in-out infinite alternate}
+  .horb.b{width:560px; height:560px; background:rgba(255,215,94,.06); bottom:-200px; right:-120px; animation:orb 22s ease-in-out infinite alternate-reverse}
+  .vig{position:absolute; inset:0; pointer-events:none; z-index:1; background:radial-gradient(120% 95% at 50% 50%, transparent 66%, rgba(0,0,0,.35))}
+  @keyframes orb{from{transform:translate(0,0) scale(1)}to{transform:translate(70px,40px) scale(1.15)}}
+  @keyframes heroIn{from{opacity:0; transform:translateY(16px)}to{opacity:1; transform:none}}
+
+  .stage{position:absolute; inset:0; display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,1fr); gap:56px; padding:34px 80px; align-items:center; z-index:2}
+  .col{display:flex; flex-direction:column; gap:22px; min-width:0}
+  .col.right{align-items:center}
+
+  .eyebrow{font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.24em; text-transform:uppercase; color:var(--muted); display:flex; gap:10px; align-items:center; animation:heroIn .5s ease both}
+  .eyebrow i{width:7px; height:7px; border-radius:50%; background:var(--flip); box-shadow:0 0 10px var(--flip-glow); animation:pulse 1.2s infinite}
+
+  .hl{font-family:'Archivo',sans-serif; font-weight:900; font-size:clamp(56px,6.1vw,106px); line-height:.9; letter-spacing:-.035em; margin:0; animation:heroIn .6s ease both}
+  .hl .gl{position:relative; display:block; color:transparent; background:linear-gradient(180deg,#ffffff 0%,#f4f7fc 38%,#aebbdc 50%,#f7f9fe 56%,#c3cfea 100%); -webkit-background-clip:text; background-clip:text; filter:drop-shadow(0 12px 30px rgba(0,0,0,.55))}
+  .hl .gl.em{background:linear-gradient(180deg,#b6fbe0 0%,#12e695 48%,#0fbd7b 54%,#7cf0c4 62%,#0a9c66 100%); -webkit-background-clip:text; background-clip:text; filter:drop-shadow(0 0 34px var(--flip-glow))}
+  .hl .gl .ghost{position:absolute; inset:0; z-index:-1; color:transparent; -webkit-text-stroke:1.5px rgba(255,255,255,.2); transform:translate(.06em,.06em); font-style:normal; pointer-events:none}
+  .hl .gl.em .ghost{-webkit-text-stroke-color:rgba(18,230,149,.28)}
+  .gl::before,.gl::after{content:attr(data-t); position:absolute; inset:0; opacity:0; pointer-events:none; text-shadow:none}
+  .gl::before{color:var(--gold); animation:gla 7s steps(1) infinite}
+  .gl::after{color:var(--flip); animation:glb 7s steps(1) infinite}
+  .gl:nth-child(2)::before,.gl:nth-child(2)::after{animation-delay:2.3s}
+
+  @keyframes gla{0%,93%{opacity:0}94%{opacity:.85; transform:translate(-6px,2px); clip-path:inset(10% 0 60% 0)}96%{transform:translate(4px,-2px); clip-path:inset(48% 0 26% 0)}98%{transform:translate(-2px,1px); clip-path:inset(74% 0 4% 0)}100%{opacity:0}}
+  @keyframes glb{0%,93%{opacity:0}95%{opacity:.85; transform:translate(6px,-1px); clip-path:inset(22% 0 52% 0)}97%{transform:translate(-5px,2px); clip-path:inset(62% 0 10% 0)}99%{transform:translate(2px,0); clip-path:inset(0 0 82% 0)}100%{opacity:0}}
+
+  .lore{font-family:'IBM Plex Mono',monospace; font-size:12.5px; line-height:1.75; color:var(--muted); max-width:54ch; margin:0; animation:heroIn .6s .1s ease both}
+  .lore b{color:var(--text); font-weight:500}
+
+  .mcpanel{
+    background:linear-gradient(165deg,var(--panel2),#0b101d); border:1px solid var(--line2); border-radius:18px;
+    padding:22px 26px 24px; max-width:580px; box-shadow:0 24px 70px rgba(0,0,0,.5); animation:heroIn .6s .2s ease both;
+  }
+  .mcpanel .lab{font-size:10px; letter-spacing:.22em; text-transform:uppercase; color:var(--muted)}
+  .mcpanel .hmc{font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:clamp(38px,4.2vw,64px); color:var(--gold); text-shadow:0 0 40px rgba(255,215,94,.3); margin:4px 0 14px; font-variant-numeric:tabular-nums; line-height:1.05}
+  .mcpanel .hbar{height:14px; border-radius:7px; background:#0a0f1b; border:1px solid var(--line2); overflow:hidden}
+  .mcpanel .hbar i{display:block; height:100%; width:0%; position:relative; overflow:hidden; background:linear-gradient(90deg,var(--flip),var(--gold)); box-shadow:0 0 20px var(--flip-glow); border-radius:7px; transition:width .6s ease}
+  .mcpanel .hbar i::after{content:''; position:absolute; inset:0; background:linear-gradient(105deg,transparent 30%,rgba(255,255,255,.4) 50%,transparent 70%); transform:translateX(-100%); animation:sheen 2.8s ease-in-out infinite}
+  @keyframes sheen{0%,55%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+  .mcpanel .hbar-ends{display:flex; justify-content:space-between; margin-top:7px; font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--faint)}
+  .mcpanel .hleft{font-family:'IBM Plex Mono',monospace; font-size:13.5px; text-transform:uppercase; letter-spacing:.08em; margin-top:16px; color:var(--amber)}
+  .mcpanel .hleft b{color:var(--gold)}
+  .mcpanel .hsub{font-size:11.5px; color:var(--muted); margin-top:8px}
+  .mcpanel .hsub b{color:var(--flip); font-family:'IBM Plex Mono',monospace}
+
+  /* conveyor lane — upcoming queue on the left, focus in the centre, conquered slide off right */
+  .right{display:flex; flex-direction:column; gap:8px; width:100%; align-items:stretch}
+  .lane-head{display:flex; justify-content:space-between; font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:.26em; text-transform:uppercase; padding:0 10px; animation:heroIn .6s .25s ease both}
+  .lane-head .l{color:var(--amber)} .lane-head .r{color:var(--flip)} .lane-head .r b{font-size:13px; letter-spacing:0; margin-left:8px}
+  .lane{position:relative; height:290px; width:100%; animation:heroIn .6s .3s ease both;
+    mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent); -webkit-mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent)}
+  .lane::before{content:''; position:absolute; left:0; right:0; top:50%; height:1px; background:linear-gradient(90deg,transparent,var(--line2) 22%,var(--amber) 50%,rgba(18,230,149,.6) 78%,transparent)}
+  .lcard{position:absolute; left:0; top:50%; width:250px; height:224px; border-radius:18px; padding:18px 20px 16px;
+    background:linear-gradient(165deg,var(--panel2),#0b101d); border:1px solid var(--line2);
+    display:flex; flex-direction:column; align-items:center; text-align:center; gap:3px; cursor:pointer;
+    transition:transform .8s cubic-bezier(.22,1,.36,1), opacity .6s ease, border-color .4s, box-shadow .4s; will-change:transform}
+  .lcard.out{opacity:0!important; transform:translate(calc(var(--x) - 50%),-50%) scale(.3)!important}
+  .lcard .chip{width:58px; height:58px; font-size:22px; box-shadow:0 0 0 3px var(--bg); margin-bottom:5px}
+  .lcard .lc-lab{font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.26em; text-transform:uppercase; color:var(--amber); display:none; align-items:center; gap:7px; margin-bottom:6px}
+  .lcard .lc-lab i{width:6px; height:6px; border-radius:50%; background:var(--amber); animation:pulse 1s infinite}
+  .lcard .lc-sym{font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:22px; color:var(--text); line-height:1.1}
+  .lcard .lc-name{font-size:11px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%}
+  .lcard .lc-cap{font-family:'IBM Plex Mono',monospace; font-size:15px; color:var(--gold); font-weight:600; margin-top:3px}
+  .lcard .lc-tag{font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--amber); background:var(--amber-soft); border:1px solid rgba(255,176,46,.3); padding:2px 10px; border-radius:99px; margin-top:4px}
+  .lcard .lc-bar{width:100%; height:5px; border-radius:3px; background:#0a0f1b; border:1px solid var(--line2); overflow:hidden; margin-top:auto; display:none}
+  .lcard .lc-bar i{display:block; height:100%; width:0%; background:linear-gradient(90deg,var(--flip),var(--gold)); transition:width .6s ease}
+  .lcard.focus{border-color:rgba(255,176,46,.5); box-shadow:0 30px 70px rgba(0,0,0,.6), 0 0 40px rgba(255,176,46,.12)}
+  .lcard.focus .lc-lab,.lcard.focus .lc-bar{display:flex}
+  .lcard.focus .chip{box-shadow:0 0 0 3px var(--bg), 0 0 30px rgba(255,176,46,.3)}
+  .lcard.won{border-color:rgba(18,230,149,.45)}
+  .lcard.won .lc-tag{color:var(--flip); background:rgba(18,230,149,.08); border-color:rgba(18,230,149,.35)}
+  .lcard.won .chip{box-shadow:0 0 0 3px var(--bg), 0 0 0 4px rgba(18,230,149,.5)}
+  .lcard.arrive{animation:arrive .8s ease}
+  @keyframes arrive{0%{box-shadow:0 0 0 0 rgba(255,176,46,.55)}100%{box-shadow:0 30px 70px rgba(0,0,0,.6), 0 0 0 30px rgba(255,176,46,0)}}
+  .hx{font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--amber)}
+
+  /* boot sequence */
+  #boot{position:fixed; inset:0; z-index:60; background:var(--bg); display:none; padding:44px 52px; font-family:'IBM Plex Mono',monospace; font-size:13px; color:var(--muted); cursor:pointer}
+  #boot.on{display:block}
+  #boot .bl{display:flex; gap:14px; line-height:1.95; animation:heroIn .18s ease both}
+  #boot .bl .t{color:var(--faint)} #boot .ok{color:var(--flip)} #boot .warn{color:var(--amber)} #boot .acc{color:var(--gold)}
+  #boot .caret{display:inline-block; width:9px; height:15px; background:var(--gold); vertical-align:-2px; animation:pulse .7s steps(1) infinite}
+  #boot .skip{position:absolute; bottom:28px; right:44px; font-size:10px; letter-spacing:.24em; color:var(--faint); text-transform:uppercase}
+  #boot.flash{animation:bootflash .5s ease-out forwards}
+  @keyframes bootflash{0%{background:#f2f5fb}100%{background:var(--bg); opacity:0; visibility:hidden}}
+
+  @media (max-width:1100px){ .stage{grid-template-columns:1fr; overflow-y:auto; align-items:start; padding:28px 32px; gap:34px} .hl{font-size:72px} .mcpanel{max-width:none} }
+
+  /* ================= detail modal ================= */
+  #modal{
+    position:fixed; inset:0; z-index:30; display:none; align-items:center; justify-content:center;
+    background:rgba(4,6,12,.72); backdrop-filter:blur(6px);
+  }
+  #modal.open{display:flex}
+  .mbox{
+    background:linear-gradient(165deg,var(--panel2),#0b101d);
+    border:1px solid var(--line2); border-radius:22px; padding:28px 32px;
+    width:min(440px,92vw); box-shadow:0 40px 120px rgba(0,0,0,.8);
+    animation:heroIn .25s ease;
+  }
+  .mhead{display:flex; align-items:center; gap:14px}
+  .mhead .chip{width:54px; height:54px; font-size:22px}
+  .mname{font-weight:700; font-size:19px; line-height:1.15}
+  .mkind{font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); margin-top:3px}
+  .mrows{margin:18px 0 4px; display:flex; flex-direction:column; gap:9px}
+  .mrow{display:flex; justify-content:space-between; align-items:baseline; font-size:12.5px; border-bottom:1px solid var(--line); padding-bottom:9px}
+  .mrow span{color:var(--muted)}
+  .mrow b{font-family:'IBM Plex Mono',monospace; font-weight:600}
+  .mrow b.green{color:var(--flip)} .mrow b.amber{color:var(--amber)} .mrow b.gold{color:var(--gold)}
+  .mbar{margin-top:14px}
+  .mbar .bar{height:8px}
+  .mnote{font-size:11px; color:var(--muted); margin-top:13px; line-height:1.55}
+  .mact{display:flex; gap:10px; margin-top:20px}
+  .mact a,.mact .mclose{
+    flex:1; display:block; text-align:center; font-family:'IBM Plex Mono',monospace; font-size:11px;
+    padding:10px 0; border-radius:9px; border:1px solid var(--line2); background:var(--panel);
+    color:var(--text); cursor:pointer; text-decoration:none;
+  }
+  .mact a:hover,.mact .mclose:hover{border-color:var(--flip-deep)}
+  .mact a:focus-visible,.mact .mclose:focus-visible{outline:2px solid var(--flip)}
+
+  /* ================= treemap ================= */
+  #map{position:absolute; inset:72px 264px 46px 0; overflow:hidden}
+  .cell{
+    position:absolute; overflow:hidden; cursor:pointer;
+    display:flex; flex-direction:column; justify-content:center; align-items:center; gap:2px;
+    border-radius:4px;
+    transition:background .5s ease, box-shadow .5s ease, transform .18s ease, filter .18s ease;
+  }
+  .cell:hover{transform:scale(1.035); z-index:6; box-shadow:0 10px 34px rgba(0,0,0,.65)}
+  .cell.linked{filter:brightness(1.55); z-index:5}
+  .cell .sym{font-family:'IBM Plex Mono',monospace; font-weight:700; white-space:nowrap; letter-spacing:.01em}
+  .cell .cap{font-family:'IBM Plex Mono',monospace; font-weight:500; white-space:nowrap; opacity:.7}
+  .chip{
+    display:flex; align-items:center; justify-content:center; overflow:hidden; flex:none;
+    font-family:'IBM Plex Mono',monospace; font-weight:700; color:#fff;
+  }
+  .chip.logo{background:#fff; border-radius:50%; box-shadow:0 2px 10px rgba(0,0,0,.45)}
+  .chip.logo img{width:72%; height:72%; object-fit:contain}
+  .chip.flag{border-radius:22%; box-shadow:0 2px 10px rgba(0,0,0,.45)}
+  .chip.flag img{width:100%; height:100%; object-fit:cover}
+  .chip.mono-chip{border-radius:50%; box-shadow:inset 0 0 0 1px rgba(255,255,255,.18)}
+  .chip.logo.dark{background:#151d33}
+  .chip.logo.full{background:#131a2c}
+  .chip.logo.full img{width:100%; height:100%}
+  .cell.flipped{box-shadow:inset 0 0 0 1px rgba(18,230,149,.55), inset 0 0 30px rgba(18,230,149,.13)}
+  .cell.flipped:hover{box-shadow:inset 0 0 0 1px rgba(18,230,149,.75), 0 10px 34px rgba(0,0,0,.65)}
+  .cell.flipped .sym{color:var(--gold)}
+  .cell.flipped .cap{color:var(--flip-soft); opacity:.95}
+  .cell.target{box-shadow:inset 0 0 0 2px var(--amber), 0 0 22px rgba(255,176,46,.28); animation:pulse 1.5s infinite}
+  .cell.flash{animation:flash .9s ease}
+  .ripple{
+    position:absolute; pointer-events:none; border:2px solid var(--flip); border-radius:50%;
+    animation:ripple 1s ease-out forwards; z-index:7;
+  }
+  @keyframes ripple{from{transform:scale(.2); opacity:1}to{transform:scale(2.6); opacity:0}}
+  @keyframes flash{0%{filter:brightness(3)}100%{filter:brightness(1)}}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
+
+  /* ================= mega flip overlay ================= */
+  #mega{
+    position:fixed; inset:0; z-index:20; display:none; pointer-events:none;
+    align-items:center; justify-content:center; flex-direction:column; gap:6px;
+    text-align:center;
+  }
+  #mega.show{display:flex; animation:mega 1.7s ease forwards}
+  #mega .big{
+    font-weight:900; font-size:clamp(44px,7vw,110px); letter-spacing:.02em; text-transform:uppercase;
+    color:var(--flip); text-shadow:0 0 60px var(--flip-glow), 0 0 12px var(--flip-glow);
+  }
+  #mega .sub{font-family:'IBM Plex Mono',monospace; font-size:15px; color:var(--gold); letter-spacing:.2em; text-transform:uppercase}
+  @keyframes mega{0%{opacity:0; transform:scale(.85)}12%{opacity:1; transform:scale(1)}78%{opacity:1}100%{opacity:0; transform:scale(1.06)}}
+
+  /* ================= next-targets rail ================= */
+  #queue{
+    position:absolute; top:72px; right:0; bottom:46px; width:264px;
+    background:linear-gradient(180deg,var(--panel),#0a0f1b);
+    border-left:1px solid var(--line);
+    display:flex; flex-direction:column; min-height:0;
+  }
+  #queue h2{
+    font-size:10px; letter-spacing:.22em; text-transform:uppercase; color:var(--amber);
+    padding:13px 16px 10px; border-bottom:1px solid var(--line);
+  }
+  #qlist{overflow-y:auto; min-height:0; flex:1; scrollbar-width:thin; scrollbar-color:var(--line2) transparent}
+  #qlist::-webkit-scrollbar{width:6px}
+  #qlist::-webkit-scrollbar-thumb{background:var(--line2); border-radius:3px}
+  .qrow{padding:10px 14px; border-bottom:1px solid var(--line); display:flex; gap:10px; align-items:center; cursor:pointer}
+  .qrow:hover{background:rgba(255,255,255,.025)}
+  .qrow.first{background:var(--amber-soft); box-shadow:inset 3px 0 0 var(--amber)}
+  .qrow .chip{width:30px; height:30px; font-size:13px}
+  .qbody{flex:1; min-width:0}
+  .qtop{display:flex; align-items:baseline; gap:7px}
+  .qrank{font-family:'IBM Plex Mono',monospace; font-size:9px; color:var(--faint); width:13px; flex:none}
+  .qsym{font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:13px}
+  .qcap{margin-left:auto; font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--gold)}
+  .qname{font-size:10px; color:var(--muted); margin:2px 0 6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .qmeta{display:flex; align-items:center; gap:8px}
+  .bar{height:4px; background:var(--panel2); border-radius:3px; overflow:hidden; flex:1}
+  .bar i{display:block; height:100%; background:linear-gradient(90deg,var(--flip),var(--gold)); transition:width .6s ease}
+  .qx{font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--amber); flex:none}
+
+  /* ================= ticker tape ================= */
+  #tape{
+    position:absolute; left:0; right:0; bottom:20px; height:26px; overflow:hidden;
+    background:var(--panel); border-top:1px solid var(--line);
+    mask-image:linear-gradient(90deg,transparent,#000 3%,#000 97%,transparent);
+    -webkit-mask-image:linear-gradient(90deg,transparent,#000 3%,#000 97%,transparent);
+  }
+  .tape-track{
+    display:inline-flex; align-items:center; gap:34px; height:100%; padding-left:20px;
+    white-space:nowrap; animation:tape 55s linear infinite; will-change:transform;
+  }
+  @keyframes tape{to{transform:translateX(-50%)}}
+  .titem{display:inline-flex; align-items:center; gap:7px; font-family:'IBM Plex Mono',monospace; font-size:10.5px}
+  .titem .chip{width:15px; height:15px; font-size:8px}
+  .titem.won{color:var(--flip-soft)} .titem.won b{color:var(--flip)}
+  .titem.tgt{color:var(--muted)} .titem.tgt b{color:var(--amber)}
+  .titem .tc{color:var(--faint)}
+
+  /* ================= footer ================= */
+  footer{
+    position:absolute; left:0; right:0; bottom:0; height:20px;
+    display:flex; align-items:center; justify-content:space-between; padding:0 12px;
+    font-family:'IBM Plex Mono',monospace; font-size:9px; color:var(--faint);
+    background:var(--bg); border-top:1px solid var(--line);
+  }
+
+  /* ================= tooltip & toasts ================= */
+  #tip{
+    position:fixed; z-index:10; pointer-events:none; display:none; max-width:300px;
+    background:rgba(17,24,39,.96); border:1px solid var(--line2); border-radius:10px;
+    padding:11px 13px; font-size:12px; box-shadow:0 14px 44px rgba(0,0,0,.7);
+  }
+  #tip .thead{display:flex; align-items:center; gap:9px; margin-bottom:6px}
+  #tip .chip{width:26px; height:26px; font-size:11px}
+  #tip .name{font-weight:700; line-height:1.15}
+  #tip .kind{font-size:8.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-top:2px}
+  #tip .line{font-family:'IBM Plex Mono',monospace; font-size:11px; margin-top:2px}
+  #tip .line.green{color:var(--flip)} #tip .line.amber{color:var(--amber)} #tip .line.dim{color:var(--muted)}
+
+  #toasts{position:fixed; left:14px; bottom:56px; z-index:11; display:flex; flex-direction:column; gap:7px}
+  .toast{
+    display:flex; align-items:center; gap:10px;
+    background:rgba(17,24,39,.97); border:1px solid var(--flip-deep); border-left:3px solid var(--flip);
+    border-radius:9px; padding:10px 14px; font-size:13px; max-width:360px;
+    box-shadow:0 14px 44px rgba(0,0,0,.7); animation:slide .25s ease;
+  }
+  .toast .chip{width:22px; height:22px; font-size:10px; flex:none}
+  .toast.down{border-color:#5c2c0a; border-left-color:var(--amber)}
+  .toast b{color:var(--flip)} .toast.down b{color:var(--amber)}
+  @keyframes slide{from{transform:translateX(-16px); opacity:0}}
+
+  @media (prefers-reduced-motion: reduce){
+    .cell,.bar i{transition:none}
+    .cell.target,.badge.live,.tape-track{animation:none}
+    .cell.flash,.ripple{animation:none}
+    #mega.show{animation:none; display:none}
+    .hl,.mcpanel,.lane,.lane-head,.lcard,.eyebrow,.lore,.horb,.gl::before,.gl::after,.lc-lab i,.eyebrow i,.mcpanel .hbar i::after{animation:none}
+    .lcard{transition:none}
+  }
+  @media (max-width:1150px){ .sim,#spark{display:none} }
+  @media (max-width:980px){ #queue{display:none} #map{inset:72px 0 46px 0} .stats .stat:nth-child(n+3){display:none} }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hgroup">
+    <div class="logo">
+      <span class="word">FL<em>I</em>P</span>
+      <small>flip the universe</small>
+    </div>
+  </div>
+  <div class="hgroup">
+    <div class="mcblock">
+      <span class="mclabel">$FLIP market cap <span id="badge" class="badge sim">PRE-LAUNCH · NO PAIR YET</span></span>
+      <span id="mc">$0</span>
+    </div>
+    <canvas id="spark" width="236" height="76"></canvas>
+  </div>
+  <div class="hgroup">
+    <div class="stats">
+      <div class="stat"><b class="green" id="nStocks">0</b><span>stocks flipped</span></div>
+      <div class="stat"><b class="green" id="nFx">0</b><span>currencies flipped</span></div>
+      <div class="stat"><b id="nLeft">0</b><span>targets left</span></div>
+      <div class="stat"><b class="gold" id="nPct">0%</b><span>world flipped</span></div>
+    </div>
+  </div>
+  <div class="hgroup grow">
+    <div class="tabs" id="tabs">
+      <button class="on" data-f="main">MAIN</button>
+      <button data-f="all">ALL</button>
+      <button data-f="stock">STOCKS</button>
+      <button data-f="fx">FX</button>
+      <button data-f="flipped">FLIPPED</button>
+    </div>
+  </div>
+  <div class="hgroup end">
+    <div class="sim hidden" id="simCtl">
+      <label>simulate cap</label>
+      <input id="slider" type="range" min="4" max="13.75" step="0.01" value="4.96" aria-label="Simulate market cap">
+    </div>
+    <button class="ca mono" id="caBtn" title="Copy contract address"><span id="caText"></span><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 012-2h9"/></svg></button>
+    <button id="sound" title="Toggle sound"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16.5 8.5a5 5 0 010 7"/><path class="slash" d="M17 10l4 4M21 10l-4 4"/></svg></button>
+  </div>
+</header>
+
+<div id="map" aria-label="Flip targets treemap"></div>
+
+<section id="hero" aria-label="Flip progress">
+  <canvas id="bgfx"></canvas>
+  <div class="horb a"></div>
+  <div class="horb b"></div>
+  <div class="vig"></div>
+  <div class="stage">
+    <div class="col">
+      <div class="eyebrow"><i></i>flip.terminal · live on robinhood chain</div>
+      <h1 class="hl"><span class="gl" data-t="FLIP THE">FLIP THE<i class="ghost">FLIP THE</i></span><span class="gl em" data-t="UNIVERSE.">UNIVERSE.<i class="ghost">UNIVERSE.</i></span></h1>
+      <p class="lore">$FLIP is the coin out to flip the universe — <b>every company</b> and <b>every currency</b> on Earth, from <b id="loreMin"></b> to <b id="loreMax"></b>. Every target's market cap is pulled from the real world at every build. No roadmap. Only targets.</p>
+      <div class="mcpanel">
+        <div class="lab">$FLIP market cap</div>
+        <div class="hmc" id="hmc">$0</div>
+        <div class="hbar"><i id="hbarFill"></i></div>
+        <div class="hbar-ends"><span id="hbarFrom">$0</span><span id="hbarGoal">—</span></div>
+        <div class="hleft" id="hleft">—</div>
+        <div class="hsub" id="hsub"></div>
+      </div>
+    </div>
+    <div class="col right">
+      <div class="lane-head"><span class="l">up next →</span><span class="r">conquered<b id="laneWon">000</b></span></div>
+      <div class="lane" id="lane"></div>
+    </div>
+  </div>
+</section>
+
+<div id="boot" aria-hidden="true">
+  <div id="bootLines"></div>
+  <div class="skip">press any key or click anywhere to skip</div>
+</div>
+
+<div id="modal" role="dialog" aria-modal="true"><div class="mbox" id="mbox"></div></div>
+
+<aside id="queue" aria-label="Next flip targets">
+  <h2><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="7"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>up next — closest to beat</h2>
+  <div id="qlist"></div>
+</aside>
+
+<div id="tape" aria-hidden="true"><div class="tape-track" id="tapeTrack"></div></div>
+
+<footer>
+  <span>ROBINHOOD CHAIN · $FLIP · FLIP THE UNIVERSE</span>
+  <span>$flip cap read on-chain via alchemy · stock caps verified via stockanalysis.com · built __BUILT__ · money supplies approximate · defunct currencies at notional value · not financial advice</span>
+</footer>
+
+<div id="mega" aria-hidden="true"><div class="big"></div><div class="sub"></div></div>
+<div id="tip"></div>
+<div id="toasts"></div>
+
+<script>
+/* ================= data ================= */
+/* ===== LAUNCH CONFIG — the contract shown in the header / copied by the CA button.
+   The live market-cap feed is configured server-side (api/mcap.js + Vercel env vars). ===== */
+const QS=new URLSearchParams(location.search);
+const CA = QS.get('ca') || '0x83d38b519308fe02158f043952b58a6b16a4a30e';
+const T=1e12,B=1e9,M=1e6,K=1e3;
+const S=(s,n,c)=>({id:'s-'+s,sym:s,name:n,cap:c,type:'stock'});
+const F=(s,n,c,fl)=>({id:'f-'+s,sym:s,name:n,cap:c,type:'fx',flag:fl});
+const DATA=[
+  // ---- mega / large caps ----
+  S('NVDA','NVIDIA',4.25*T),S('MSFT','Microsoft',3.7*T),S('AAPL','Apple',3.5*T),
+  S('GOOGL','Alphabet',2.85*T),S('AMZN','Amazon',2.45*T),S('META','Meta Platforms',1.85*T),
+  S('AVGO','Broadcom',1.45*T),S('TSLA','Tesla',1.1*T),S('BRK.B','Berkshire Hathaway',1.05*T),
+  S('WMT','Walmart',810*B),S('JPM','JPMorgan Chase',800*B),S('LLY','Eli Lilly',680*B),
+  S('ORCL','Oracle',660*B),S('V','Visa',650*B),S('MA','Mastercard',530*B),
+  S('NFLX','Netflix',510*B),S('XOM','Exxon Mobil',460*B),S('JNJ','Johnson & Johnson',430*B),
+  S('COST','Costco',420*B),S('HD','Home Depot',400*B),S('PLTR','Palantir',390*B),
+  S('ABBV','AbbVie',380*B),S('PG','Procter & Gamble',370*B),S('BAC','Bank of America',360*B),
+  S('KO','Coca-Cola',290*B),S('GE','GE Aerospace',290*B),S('UNH','UnitedHealth',280*B),
+  S('CVX','Chevron',270*B),S('TMUS','T-Mobile',270*B),S('CSCO','Cisco',270*B),
+  S('WFC','Wells Fargo',260*B),S('AMD','AMD',260*B),S('PM','Philip Morris',250*B),
+  S('CRM','Salesforce',240*B),S('ABT','Abbott',230*B),S('IBM','IBM',230*B),
+  S('MS','Morgan Stanley',220*B),S('AXP','American Express',220*B),S('LIN','Linde',220*B),
+  S('GS','Goldman Sachs',220*B),S('MCD','McDonald’s',210*B),S('MRK','Merck',210*B),
+  S('DIS','Disney',210*B),S('T','AT&T',200*B),S('RTX','RTX',200*B),
+  S('PEP','PepsiCo',200*B),S('CAT','Caterpillar',200*B),S('UBER','Uber',200*B),
+  S('INTU','Intuit',190*B),S('VZ','Verizon',180*B),S('C','Citigroup',180*B),
+  S('BKNG','Booking Holdings',180*B),S('QCOM','Qualcomm',170*B),S('TXN','Texas Instruments',170*B),
+  S('BA','Boeing',160*B),S('ISRG','Intuitive Surgical',160*B),S('SPGI','S&P Global',160*B),
+  S('ADBE','Adobe',150*B),S('LOW','Lowe’s',150*B),S('PFE','Pfizer',140*B),
+  S('AMAT','Applied Materials',140*B),S('HON','Honeywell',130*B),S('UNP','Union Pacific',130*B),
+  S('NKE','Nike',110*B),S('SBUX','Starbucks',100*B),S('HOOD','Robinhood',100*B),
+  S('INTC','Intel',100*B),S('COIN','Coinbase',80*B),S('PYPL','PayPal',65*B),
+  // ---- mid / small ----
+  S('GM','General Motors',55*B),S('F','Ford',45*B),S('DAL','Delta Air Lines',40*B),
+  S('CCL','Carnival',35*B),S('UAL','United Airlines',30*B),S('NOK','Nokia',25*B),
+  S('PINS','Pinterest',24*B),S('RIVN','Rivian',15*B),S('SNAP','Snap',14*B),
+  S('ROKU','Roku',13*B),S('GME','GameStop',10*B),S('LCID','Lucid',7*B),
+  S('DJT','Trump Media',5*B),S('PTON','Peloton',3*B),S('BB','BlackBerry',2.5*B),
+  S('OPEN','Opendoor',2*B),S('AMC','AMC Entertainment',1.2*B),S('SNDL','SNDL Inc.',500*M),
+  S('CHPT','ChargePoint',400*M),
+  // ---- penny / nano / OTC shells — all real tickers, live-verified at build time ----
+  S('HCMC','Healthier Choices Management',52.7*M),S('AABB','Asia Broadband',48.1*M),
+  S('WKHS','Workhorse Group',34.2*M),S('GNS','Genius Group',33.4*M),
+  S('ASTI','Ascent Solar Technologies',28.2*M),S('EEENF','88 Energy',19.2*M),
+  S('OPTI','Optec International',8.55*M),S('CYBL','Cyberlux',7.06*M),
+  S('FFAI','Faraday Future Intelligent Electric',7.02*M),S('TOPS','Top Ships',4.02*M),
+  S('ENZC','Enzolytics',2.42*M),S('RDAR','Telvantis',2.0*M),
+  S('NKLAQ','Nikola (post-bankruptcy)',836*K),S('ILUS','Ilustrato Pictures International',324*K),
+  S('GVSI','Good Vibrations Shoes',212*K),S('OZSC','Ozop Energy Solutions',118*K),
+  S('BBIG','Vinco Ventures',70*K),S('PHIL','Philux Global Group',47*K),
+  S('SNPW','Sun Pacific Holding',33*K),S('TONR','Tonner-One World Holdings',12.5*K),
+  S('SIRC','Solar Integrated Roofing',12.4*K),S('ALPP','Alpine 4 Holdings',2.7*K),
+  S('MMATQ','Meta Materials (post-bankruptcy)',7),
+  // ---- currencies (broad money, USD) ----
+  F('CNY','Chinese yuan',46*T,'🇨🇳'),F('USD','US dollar',22*T,'🇺🇸'),
+  F('EUR','Euro',17.5*T,'🇪🇺'),F('JPY','Japanese yen',8.5*T,'🇯🇵'),
+  F('GBP','British pound',4*T,'🇬🇧'),F('INR','Indian rupee',3.2*T,'🇮🇳'),
+  F('KRW','South Korean won',3.1*T,'🇰🇷'),F('CAD','Canadian dollar',2.4*T,'🇨🇦'),
+  F('HKD','Hong Kong dollar',2.2*T,'🇭🇰'),F('TWD','New Taiwan dollar',2.1*T,'🇹🇼'),
+  F('AUD','Australian dollar',1.9*T,'🇦🇺'),F('CHF','Swiss franc',1.4*T,'🇨🇭'),
+  F('BRL','Brazilian real',1.2*T,'🇧🇷'),F('RUB','Russian ruble',1.2*T,'🇷🇺'),
+  F('SAR','Saudi riyal',750*B,'🇸🇦'),F('THB','Thai baht',750*B,'🇹🇭'),
+  F('MXN','Mexican peso',700*B,'🇲🇽'),F('AED','UAE dirham',650*B,'🇦🇪'),
+  F('SGD','Singapore dollar',650*B,'🇸🇬'),F('VND','Vietnamese dong',650*B,'🇻🇳'),
+  F('TRY','Turkish lira',600*B,'🇹🇷'),F('PLN','Polish zloty',600*B,'🇵🇱'),
+  F('MYR','Malaysian ringgit',550*B,'🇲🇾'),F('IDR','Indonesian rupiah',550*B,'🇮🇩'),
+  F('ILS','Israeli shekel',500*B,'🇮🇱'),F('SEK','Swedish krona',420*B,'🇸🇪'),
+  F('NOK','Norwegian krone',300*B,'🇳🇴'),F('PHP','Philippine peso',300*B,'🇵🇭'),
+  F('ZAR','South African rand',260*B,'🇿🇦'),F('DKK','Danish krone',260*B,'🇩🇰'),
+  F('EGP','Egyptian pound',260*B,'🇪🇬'),F('CZK','Czech koruna',250*B,'🇨🇿'),
+  F('NZD','New Zealand dollar',250*B,'🇳🇿'),F('CLP','Chilean peso',150*B,'🇨🇱'),
+  F('BDT','Bangladeshi taka',160*B,'🇧🇩'),F('COP','Colombian peso',130*B,'🇨🇴'),
+  F('PKR','Pakistani rupee',130*B,'🇵🇰'),F('RON','Romanian leu',120*B,'🇷🇴'),
+  F('HUF','Hungarian forint',110*B,'🇭🇺'),F('ARS','Argentine peso',90*B,'🇦🇷'),
+  F('NGN','Nigerian naira',80*B,'🇳🇬'),F('UAH','Ukrainian hryvnia',80*B,'🇺🇦'),
+  F('NPR','Nepalese rupee',45*B,'🇳🇵'),F('LKR','Sri Lankan rupee',30*B,'🇱🇰'),
+  F('KES','Kenyan shilling',25*B,'🇰🇪'),F('GHS','Ghanaian cedi',15*B,'🇬🇭'),
+  F('ISK','Icelandic krona',15*B,'🇮🇸'),F('ALL','Albanian lek',12*B,'🇦🇱'),
+  F('GEL','Georgian lari',12*B,'🇬🇪'),F('AMD','Armenian dram',8*B,'🇦🇲'),
+  F('JMD','Jamaican dollar',7*B,'🇯🇲'),F('MNT','Mongolian tugrik',5*B,'🇲🇳'),
+  F('KGS','Kyrgyzstani som',4*B,'🇰🇬'),F('GNF','Guinean franc',3.5*B,'🇬🇳'),
+  F('TJS','Tajikistani somoni',3*B,'🇹🇯'),F('MWK','Malawian kwacha',2.5*B,'🇲🇼'),
+  F('MRU','Mauritanian ouguiya',2*B,'🇲🇷'),F('CVE','Cape Verdean escudo',2*B,'🇨🇻'),
+  F('BIF','Burundian franc',1.5*B,'🇧🇮'),F('SCR','Seychellois rupee',1.2*B,'🇸🇨'),
+  F('DJF','Djiboutian franc',1.2*B,'🇩🇯'),F('SLE','Sierra Leonean leone',800*M,'🇸🇱'),
+  F('GMD','Gambian dalasi',600*M,'🇬🇲'),F('LRD','Liberian dollar',500*M,'🇱🇷'),
+  F('VUV','Vanuatu vatu',400*M,'🇻🇺'),F('KMF','Comorian franc',350*M,'🇰🇲'),
+  F('WST','Samoan tala',300*M,'🇼🇸'),F('SSP','South Sudanese pound',250*M,'🇸🇸'),
+  F('TOP','Tongan paʻanga',250*M,'🇹🇴'),F('STN','São Tomé dobra',150*M,'🇸🇹'),
+  // middle east & africa
+  F('IRR','Iranian rial',170*B,'🇮🇷'),F('QAR','Qatari riyal',190*B,'🇶🇦'),
+  F('MAD','Moroccan dirham',190*B,'🇲🇦'),F('DZD','Algerian dinar',180*B,'🇩🇿'),
+  F('KWD','Kuwaiti dinar',130*B,'🇰🇼'),F('IQD','Iraqi dinar',120*B,'🇮🇶'),
+  F('LYD','Libyan dinar',90*B,'🇱🇾'),F('XOF','West African CFA franc',90*B,'🌍'),
+  F('OMR','Omani rial',60*B,'🇴🇲'),F('JOD','Jordanian dinar',60*B,'🇯🇴'),
+  F('XAF','Central African CFA franc',45*B,'🌍'),F('BHD','Bahraini dinar',40*B,'🇧🇭'),
+  F('TND','Tunisian dinar',40*B,'🇹🇳'),F('ETB','Ethiopian birr',30*B,'🇪🇹'),
+  F('TZS','Tanzanian shilling',20*B,'🇹🇿'),F('MUR','Mauritian rupee',18*B,'🇲🇺'),
+  F('AOA','Angolan kwanza',15*B,'🇦🇴'),F('UGX','Ugandan shilling',10*B,'🇺🇬'),
+  F('BWP','Botswana pula',10*B,'🇧🇼'),F('YER','Yemeni rial',8*B,'🇾🇪'),
+  F('ZMW','Zambian kwacha',8*B,'🇿🇲'),F('NAD','Namibian dollar',8*B,'🇳🇦'),
+  F('LBP','Lebanese pound',5*B,'🇱🇧'),F('SDG','Sudanese pound',5*B,'🇸🇩'),
+  F('RWF','Rwandan franc',5*B,'🇷🇼'),F('MZN','Mozambican metical',5*B,'🇲🇿'),
+  F('MGA','Malagasy ariary',4*B,'🇲🇬'),F('SYP','Syrian pound',3*B,'🇸🇾'),
+  F('CDF','Congolese franc',3*B,'🇨🇩'),F('SZL','Swazi lilangeni',1.5*B,'🇸🇿'),
+  F('ERN','Eritrean nakfa',1.5*B,'🇪🇷'),F('LSL','Lesotho loti',1*B,'🇱🇸'),
+  F('ZWG','Zimbabwe gold (ZiG)',1*B,'🇿🇼'),F('SOS','Somali shilling',400*M,'🇸🇴'),
+  // asia & cis
+  F('MOP','Macanese pataca',85*B,'🇲🇴'),F('KZT','Kazakhstani tenge',80*B,'🇰🇿'),
+  F('BGN','Bulgarian lev',45*B,'🇧🇬'),F('RSD','Serbian dinar',30*B,'🇷🇸'),
+  F('AZN','Azerbaijani manat',25*B,'🇦🇿'),F('MMK','Myanmar kyat',25*B,'🇲🇲'),
+  F('UZS','Uzbekistani som',20*B,'🇺🇿'),F('BYN','Belarusian ruble',15*B,'🇧🇾'),
+  F('BAM','Bosnian convertible mark',12*B,'🇧🇦'),F('BND','Brunei dollar',12*B,'🇧🇳'),
+  F('TMT','Turkmenistani manat',10*B,'🇹🇲'),F('MKD','Macedonian denar',8*B,'🇲🇰'),
+  F('MDL','Moldovan leu',6*B,'🇲🇩'),F('KHR','Cambodian riel',5*B,'🇰🇭'),
+  F('AFN','Afghan afghani',4*B,'🇦🇫'),F('LAK','Lao kip',4*B,'🇱🇦'),
+  F('MVR','Maldivian rufiyaa',4*B,'🇲🇻'),F('KPW','North Korean won',2*B,'🇰🇵'),
+  F('BTN','Bhutanese ngultrum',2*B,'🇧🇹'),
+  // americas
+  F('PEN','Peruvian sol',120*B,'🇵🇪'),F('GTQ','Guatemalan quetzal',55*B,'🇬🇹'),
+  F('DOP','Dominican peso',50*B,'🇩🇴'),F('UYU','Uruguayan peso',40*B,'🇺🇾'),
+  F('CRC','Costa Rican colón',40*B,'🇨🇷'),F('BOB','Bolivian boliviano',30*B,'🇧🇴'),
+  F('PYG','Paraguayan guaraní',20*B,'🇵🇾'),F('HNL','Honduran lempira',20*B,'🇭🇳'),
+  F('TTD','Trinidad & Tobago dollar',20*B,'🇹🇹'),F('CUP','Cuban peso',15*B,'🇨🇺'),
+  F('NIO','Nicaraguan córdoba',8*B,'🇳🇮'),F('BSD','Bahamian dollar',8*B,'🇧🇸'),
+  F('BBD','Barbadian dollar',6*B,'🇧🇧'),F('XCD','East Caribbean dollar',5*B,'🇰🇳'),
+  F('KYD','Cayman Islands dollar',5*B,'🇰🇾'),F('VES','Venezuelan bolívar',4*B,'🇻🇪'),
+  F('HTG','Haitian gourde',4*B,'🇭🇹'),F('XCG','Caribbean guilder',4*B,'🇨🇼'),
+  F('GYD','Guyanese dollar',3*B,'🇬🇾'),F('BMD','Bermudian dollar',3*B,'🇧🇲'),
+  F('AWG','Aruban florin',2.5*B,'🇦🇼'),F('BZD','Belize dollar',2*B,'🇧🇿'),
+  F('SRD','Surinamese dollar',2*B,'🇸🇷'),F('PAB','Panamanian balboa (coins only)',500*M,'🇵🇦'),
+  // pacific & micro issues
+  F('PGK','Papua New Guinean kina',8*B,'🇵🇬'),F('XPF','CFP franc',7*B,'🇵🇫'),
+  F('FJD','Fijian dollar',4*B,'🇫🇯'),F('SBD','Solomon Islands dollar',700*M,'🇸🇧'),
+  F('JEP','Jersey pound (local issue)',130*M,'🇯🇪'),F('IMP','Manx pound (local issue)',100*M,'🇮🇲'),
+  F('GIP','Gibraltar pound (notes issued)',90*M,'🇬🇮'),F('GGP','Guernsey pound (local issue)',60*M,'🇬🇬'),
+  F('FKP','Falkland Islands pound',20*M,'🇫🇰'),F('SHP','Saint Helena pound',12*M,'🇸🇭'),
+  F('KID','Kiribati dollar (coins only)',5*M,'🇰🇮'),F('TVD','Tuvaluan dollar (coins only)',2*M,'🇹🇻'),
+  // defunct tier
+  F('VEB','Venezuelan bolívar (pre-2008, defunct)',60*K,'🇻🇪'),
+  F('ZWD','Zimbabwe dollar (2009, demonetized)',25*K,'🇿🇼'),
+];
+
+/* live-verified stock caps {sym:{c:cap, u:source path}}, injected by build.js */
+const CAPS=__CAPDATA__;
+for(const d of DATA){
+  if(d.type==='stock'&&CAPS[d.sym]){d.cap=CAPS[d.sym].c; d.src=CAPS[d.sym].u;}
+}
+DATA.sort((a,b)=>b.cap-a.cap);
+
+const SHELL_SYMS=['MMATQ','NKLAQ','SIRC','TONR','PHIL','SNPW','BBIG','GVSI','ILUS','ALPP','OZSC','RDAR','ENZC','CYBL','OPTI'];
+for(const d of DATA){
+  if(d.type==='stock'&&SHELL_SYMS.includes(d.sym)) d.note='Real OTC ticker. Cap = last traded price × shares outstanding, pulled from stockanalysis.com at every site build — these trade thinly, so the figure can lag the tape.';
+  if(d.sym==='VEB'||d.sym==='ZWD') d.note='Defunct hyperinflated currency shown at a notional residual value — kept on the board so there is something to flip on day one.';
+}
+
+/* embedded logo/flag images (data URIs) + chip render classes, injected by build.js */
+const IMG=__IMGDATA__;
+const CHIPCLASS=__CHIPCLASS__;
+
+/* ================= state ================= */
+let mc = 0;
+let live = false;
+let filter = 'main';
+{
+  const h0=location.hash.slice(1);
+  if(['main','all','stock','fx','flipped'].includes(h0)) filter=h0;
+}
+document.body.classList.toggle('main-view',filter==='main');
+let scrubUntil = 0;
+let flipped = new Set();
+let firstRun = true;
+const history=[];
+
+/* ================= helpers ================= */
+const $=q=>document.querySelector(q);
+function fmt(v){
+  const a=Math.abs(v);
+  if(a>=1e12) return '$'+(v/1e12).toFixed(2)+'T';
+  if(a>=1e9)  return '$'+(v/1e9).toFixed(2)+'B';
+  if(a>=1e6)  return '$'+(v/1e6).toFixed(2)+'M';
+  if(a>=1e3)  return '$'+(v/1e3).toFixed(1)+'K';
+  return '$'+v.toFixed(0);
+}
+function xfmt(x){return x>=100?Math.round(x)+'×':x>=10?x.toFixed(1)+'×':x.toFixed(2)+'×'}
+function hash(s){let h=0;for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return h}
+const REDUCED=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function chipHTML(d,cls){
+  const src=IMG[d.id];
+  if(src) return `<span class="chip ${cls||''} ${d.type==='fx'?'flag':'logo'} ${CHIPCLASS[d.id]||''}"><img src="${src}" alt=""></span>`;
+  const h=hash(d.id)%360;
+  return `<span class="chip ${cls||''} mono-chip" style="background:linear-gradient(150deg,hsl(${h} 45% 38%),hsl(${h} 50% 24%))">${d.sym.slice(0,2)}</span>`;
+}
+const ICONS={
+  up:'<path d="M3 17l5.5-5.5 4 4L20 8"/><path d="M14 8h6v6"/>',
+  down:'<path d="M3 7l5.5 5.5 4-4L20 16"/><path d="M14 16h6v-6"/>',
+  check:'<path d="M4 12.5l5 5L20 6.5"/>',
+};
+const icon=n=>`<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">${ICONS[n]}</svg>`;
+
+/* ================= sound (aggr.trade-style synth) ================= */
+let actx=null, soundOn=false;
+function ensureAudio(){
+  if(!actx) actx = new (window.AudioContext||window.webkitAudioContext)();
+  if(actx.state==='suspended') actx.resume();
+}
+function blip(freq,vol,dur,type='sine',delay=0){
+  if(!soundOn||!actx) return;
+  const t=actx.currentTime+delay;
+  const o=actx.createOscillator(), g=actx.createGain();
+  o.type=type; o.frequency.setValueAtTime(freq,t);
+  g.gain.setValueAtTime(0,t);
+  g.gain.linearRampToValueAtTime(vol,t+.005);
+  g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+  o.connect(g); g.connect(actx.destination);
+  o.start(t); o.stop(t+dur+.05);
+}
+const tickUp   = m=>blip(659+m*260,.03+m*.05,.08);
+const tickDown = m=>blip(392-m*90,.03+m*.05,.09,'triangle');
+const flipSound   =()=>[523.25,659.25,783.99,1046.5].forEach((f,i)=>blip(f,.09,.22,'sine',i*.085));
+const unflipSound =()=>[493.88,392,329.63].forEach((f,i)=>blip(f,.06,.18,'triangle',i*.09));
+
+/* ================= squarified treemap ================= */
+function worstRatio(row,sum,side){
+  const t=sum/side; let w=0;
+  for(const it of row){const len=it.v/t; w=Math.max(w,len/t,t/len);}
+  return w;
+}
+function squarify(items,x,y,w,h){
+  const out=[]; let i=0;
+  while(i<items.length){
+    if(w<=0||h<=0){for(;i<items.length;i++)out.push({d:items[i].d,x,y,w:0,h:0});break;}
+    const horiz = w<h;
+    const side = horiz? w : h;
+    let row=[items[i]], sum=items[i].v, worst=worstRatio(row,sum,side), j=i+1;
+    while(j<items.length){
+      const ns=sum+items[j].v, nr=row.concat(items[j]), nw=worstRatio(nr,ns,side);
+      if(nw<=worst){row=nr;sum=ns;worst=nw;j++;} else break;
+    }
+    const thick=sum/side; let off=0;
+    for(const it of row){
+      const len=it.v/thick;
+      out.push(horiz ? {d:it.d,x:x+off,y,w:len,h:thick}
+                     : {d:it.d,x,y:y+off,w:thick,h:len});
+      off+=len;
+    }
+    if(horiz){y+=thick;h-=thick;} else {x+=thick;w-=thick;}
+    i=j;
+  }
+  return out;
+}
+
+/* ================= rendering ================= */
+const map=$('#map'), tip=$('#tip');
+const cells=new Map();
+
+function visibleData(){
+  if(filter==='main')    return DATA; // hero hides the map; keep it laid out underneath
+  if(filter==='stock')   return DATA.filter(d=>d.type==='stock');
+  if(filter==='fx')      return DATA.filter(d=>d.type==='fx');
+  if(filter==='flipped') return DATA.filter(d=>flipped.has(d.id));
+  return DATA;
+}
+function layout(){
+  const W=map.clientWidth, H=map.clientHeight;
+  const data=visibleData();
+  for(const [id,el] of cells) el.style.display='none';
+  if(!data.length||W<10||H<10) return;
+  const vals=data.map(d=>({d,v:Math.pow(d.cap,0.25)}));
+  const total=vals.reduce((a,b)=>a+b.v,0), scale=W*H/total;
+  vals.forEach(o=>o.v*=scale);
+  for(const r of squarify(vals,0,0,W,H)){
+    let el=cells.get(r.d.id);
+    if(!el){
+      el=document.createElement('div');
+      el.className='cell';
+      el.innerHTML=chipHTML(r.d)+'<span class="sym"></span><span class="cap"></span>';
+      el.addEventListener('mousemove',e=>showTip(e,r.d));
+      el.addEventListener('mouseleave',()=>tip.style.display='none');
+      el.addEventListener('click',()=>openModal(r.d));
+      map.appendChild(el);
+      cells.set(r.d.id,el);
+    }
+    // 2px gutters between tiles
+    const gx=r.x+1, gy=r.y+1, gw=Math.max(0,r.w-2), gh=Math.max(0,r.h-2);
+    el.style.display='flex';
+    el.style.left=gx+'px'; el.style.top=gy+'px';
+    el.style.width=gw+'px'; el.style.height=gh+'px';
+    const chip=el.children[0], sym=el.children[1], cap=el.children[2];
+    if(!sym.textContent) sym.textContent=r.d.sym;
+    if(!cap.textContent) cap.textContent=fmt(r.d.cap);
+    const fs=Math.max(8,Math.min(25,Math.sqrt(gw*gh)/5.6));
+    sym.style.fontSize=fs+'px';
+    sym.style.display=(gw>26&&gh>13)?'':'none';
+    cap.style.fontSize=Math.max(8,fs*.6)+'px';
+    cap.style.display=(gw>58&&gh>40)?'':'none';
+    const cs=Math.round(Math.max(14,Math.min(46,Math.min(gw,gh)*.34)));
+    chip.style.width=cs+'px'; chip.style.height=cs+'px';
+    chip.style.fontSize=Math.round(cs*.42)+'px';
+    chip.style.display=(gw>40&&gh>44)?'flex':'none';
+    chip.style.marginBottom=(gh>70?'3px':'0');
+    paint(r.d,el);
+  }
+}
+function paint(d,el){
+  const isFlip=flipped.has(d.id);
+  el.classList.toggle('flipped',isFlip);
+  const j=(hash(d.id)%9)-4;
+  if(isFlip){
+    el.style.background=`linear-gradient(160deg, hsl(158 58% ${20+j*0.8}%), hsl(163 62% ${13+j*0.7}%))`;
+    el.style.color='#d6ffee';
+  }else{
+    const h=d.type==='fx'? 274:222;
+    el.style.background=`linear-gradient(160deg, hsl(${h+j} 40% ${18+j}%), hsl(${h+j} 44% ${12+j*0.8}%))`;
+    el.style.color= d.type==='fx' ? '#d3c9ef' : '#c3cfee';
+  }
+}
+function showTip(e,d){
+  const isFlip=flipped.has(d.id);
+  const kind=d.type==='fx'?'currency · broad money':'stock · market cap';
+  const rank=DATA.indexOf(d)+1;
+  let status;
+  if(isFlip) status='<div class="line green">FLIPPED ✓</div>';
+  else status=`<div class="line amber">need ${fmt(d.cap-mc)} more · ${xfmt(d.cap/Math.max(mc,1))} away</div>`;
+  tip.innerHTML=`<div class="thead">${chipHTML(d)}<div><div class="name">${d.name}</div><div class="kind">${kind}</div></div></div>
+    <div class="line">${fmt(d.cap)}</div>
+    <div class="line dim">world rank #${rank} of ${DATA.length}</div>${status}
+    <div class="line dim">click for details</div>`;
+  tip.style.display='block';
+  const r=tip.getBoundingClientRect();
+  tip.style.left=Math.min(e.clientX+14,innerWidth-r.width-8)+'px';
+  tip.style.top=Math.min(e.clientY+14,innerHeight-r.height-8)+'px';
+}
+
+/* ================= sparkline ================= */
+function drawSpark(){
+  const c=$('#spark'); if(!c.getContext) return;
+  const ctx=c.getContext('2d'), W=c.width, H=c.height;
+  ctx.clearRect(0,0,W,H);
+  if(history.length<2) return;
+  const pts=history.slice(-160);
+  const lo=Math.min(...pts), hi=Math.max(...pts), span=(hi-lo)||1;
+  const px=i=>i/(pts.length-1)*(W-8)+4;
+  const py=v=>H-8-((v-lo)/span)*(H-18);
+  ctx.beginPath();
+  pts.forEach((v,i)=>i?ctx.lineTo(px(i),py(v)):ctx.moveTo(px(i),py(v)));
+  const grad=ctx.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0,'rgba(255,215,94,.28)'); grad.addColorStop(1,'rgba(255,215,94,0)');
+  ctx.lineTo(px(pts.length-1),H); ctx.lineTo(px(0),H); ctx.closePath();
+  ctx.fillStyle=grad; ctx.fill();
+  ctx.beginPath();
+  pts.forEach((v,i)=>i?ctx.lineTo(px(i),py(v)):ctx.moveTo(px(i),py(v)));
+  ctx.strokeStyle='#ffd75e'; ctx.lineWidth=2.5; ctx.lineJoin='round'; ctx.stroke();
+  const lx=px(pts.length-1), ly=py(pts[pts.length-1]);
+  ctx.beginPath(); ctx.arc(lx,ly,3.5,0,7); ctx.fillStyle='#ffd75e'; ctx.fill();
+}
+
+/* ================= toasts / effects ================= */
+const toasts=$('#toasts');
+function toast(html,down=false){
+  while(toasts.children.length>=4) toasts.firstChild.remove();
+  const t=document.createElement('div');
+  t.className='toast'+(down?' down':'');
+  t.innerHTML=html;
+  toasts.appendChild(t);
+  setTimeout(()=>t.remove(),6000);
+}
+function ripple(id){
+  const el=cells.get(id); if(!el||el.style.display==='none') return;
+  const r=document.createElement('div');
+  r.className='ripple';
+  const s=Math.max(el.offsetWidth,el.offsetHeight,40);
+  r.style.width=r.style.height=s+'px';
+  r.style.left=(el.offsetLeft+el.offsetWidth/2-s/2)+'px';
+  r.style.top=(el.offsetTop+el.offsetHeight/2-s/2)+'px';
+  map.appendChild(r);
+  setTimeout(()=>r.remove(),1100);
+}
+/* ================= detail modal ================= */
+let modalId=null;
+function openModal(d){
+  modalId=d.id; renderModal();
+  $('#modal').classList.add('open');
+  blip(880,.04,.06);
+}
+function closeModal(){modalId=null; $('#modal').classList.remove('open');}
+function renderModal(){
+  if(!modalId) return;
+  const d=DATA.find(x=>x.id===modalId); if(!d) return;
+  const isFlip=flipped.has(d.id);
+  const rank=DATA.indexOf(d)+1;
+  const pct=Math.min(100,mc/d.cap*100);
+  const link = d.type==='stock'
+    ? (d.src?`https://stockanalysis.com/${d.src}/`:`https://www.tradingview.com/symbols/${d.sym.replace('.','-').replace(/[^A-Za-z-]/g,'')}/`)
+    : `https://en.wikipedia.org/w/index.php?search=${encodeURIComponent(d.name.replace(/\(.*\)/,'').trim())}`;
+  $('#mbox').innerHTML=`
+    <div class="mhead">${chipHTML(d)}<div><div class="mname">${d.name}</div><div class="mkind">${d.type==='fx'?'currency · broad money':'stock · market cap'} · ${d.sym}</div></div></div>
+    <div class="mrows">
+      <div class="mrow"><span>${d.type==='fx'?'money supply':'market cap'}</span><b class="gold">${fmt(d.cap)}</b></div>
+      <div class="mrow"><span>world rank</span><b>#${rank} of ${DATA.length}</b></div>
+      <div class="mrow"><span>$FLIP market cap</span><b>${fmt(mc)}</b></div>
+      <div class="mrow"><span>status</span>${isFlip?'<b class="green">FLIPPED ✓</b>':`<b class="amber">${xfmt(d.cap/Math.max(mc,1))} away</b>`}</div>
+      ${isFlip?'':`<div class="mrow"><span>left to flip</span><b class="amber">${fmt(d.cap-mc)}</b></div>`}
+    </div>
+    <div class="mbar"><div class="bar"><i style="width:${pct}%"></i></div></div>
+    <div class="mnote">${isFlip
+      ?`$FLIP passed ${d.sym} — it now ranks above ${d.name} on the world board.`
+      :`When $FLIP reaches ${fmt(d.cap)}, it passes ${d.sym} and climbs to world #${rank}.`}${d.note?'<br><br>'+d.note:''}</div>
+    <div class="mact">${link?`<a href="${link}" target="_blank" rel="noopener">${d.type==='fx'?'about this currency ↗':'verify the data ↗'}</a>`:''}<button class="mclose" id="mclose">close</button></div>`;
+  $('#mclose').onclick=closeModal;
+}
+$('#modal').addEventListener('click',e=>{if(e.target.id==='modal')closeModal()});
+addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+
+let megaT;
+function mega(d){
+  const m=$('#mega');
+  m.querySelector('.big').textContent='FLIPPED';
+  m.querySelector('.sub').textContent=`${d.name} · ${fmt(d.cap)}`;
+  m.classList.remove('show'); void m.offsetWidth; m.classList.add('show');
+  clearTimeout(megaT); megaT=setTimeout(()=>m.classList.remove('show'),1750);
+}
+
+/* ================= ticker tape ================= */
+let tapeKey='', stripKey='';
+function buildTape(upcoming){
+  const won=[...flipped].map(id=>DATA.find(d=>d.id===id)).sort((a,b)=>b.cap-a.cap).slice(0,8);
+  const key=won.map(d=>d.id).join()+'|'+(upcoming[0]?upcoming[0].id:'');
+  if(key===tapeKey) return;
+  tapeKey=key;
+  const items=[
+    ...won.map(d=>`<span class="titem won">${chipHTML(d)}<b>${d.sym}</b> flipped <span class="tc">${fmt(d.cap)}</span> ✓</span>`),
+    ...upcoming.slice(0,10).map(d=>`<span class="titem tgt">${chipHTML(d)}<b>${d.sym}</b> <span class="tc">${fmt(d.cap)} · next</span></span>`),
+  ].join('');
+  $('#tapeTrack').innerHTML=items+items; // doubled for seamless loop
+}
+
+/* ================= animated market-cap counter ================= */
+let mcShown=null, mcAnim;
+function setMCText(v){const s=fmt(v); $('#mc').textContent=s; $('#hmc').textContent=s;}
+function animateMC(){
+  if(REDUCED||mcShown===null){mcShown=mc; setMCText(mc); return;}
+  cancelAnimationFrame(mcAnim);
+  const from=mcShown, to=mc, t0=performance.now();
+  const step=t=>{
+    const k=Math.min(1,Math.max(0,(t-t0)/450)), e=1-Math.pow(1-k,3);
+    mcShown=from+(to-from)*e; setMCText(mcShown);
+    if(k<1) mcAnim=requestAnimationFrame(step);
+  };
+  mcAnim=requestAnimationFrame(step);
+}
+
+/* ================= flip engine ================= */
+function update(){
+  animateMC();
+  history.push(mc); if(history.length>400) history.shift();
+  drawSpark();
+
+  const now=new Set(DATA.filter(d=>d.cap<mc).map(d=>d.id));
+  const gained=[...now].filter(id=>!flipped.has(id));
+  const lost=[...flipped].filter(id=>!now.has(id));
+  flipped=now;
+
+  if(firstRun) for(const d of DATA) if(now.has(d.id)) flipLog.push(d.id);
+  if(!firstRun){
+    for(const id of gained) logFlip(id);
+    if(gained.length>5){
+      toast(`${icon('up')} <b>${gained.length} targets flipped</b> in one candle`);
+      flipSound();
+    }else for(const id of gained){
+      const d=DATA.find(x=>x.id===id);
+      toast(`${chipHTML(d)} <span>$FLIP just flipped <b>${d.name}</b> (${fmt(d.cap)})</span>`);
+      flipSound();
+      if(gained.length<=2) mega(d);
+    }
+    if(lost.length){
+      const d=DATA.find(x=>x.id===lost[0]);
+      toast(`${icon('down')} <span>lost the flip on <b>${d.name}</b>${lost.length>1?` +${lost.length-1} more`:''}</span>`,true);
+      unflipSound();
+    }
+    for(const id of gained){ripple(id);}
+    for(const id of gained.concat(lost)){
+      const el=cells.get(id);
+      if(el){el.classList.remove('flash');void el.offsetWidth;el.classList.add('flash');}
+    }
+  }
+  firstRun=false;
+
+  let ns=0,nf=0;
+  for(const id of flipped) (id[0]==='s'?ns++:nf++);
+  $('#nStocks').textContent=ns;
+  $('#nFx').textContent=nf;
+  $('#nLeft').textContent=DATA.length-flipped.size;
+  $('#nPct').textContent=(flipped.size/DATA.length*100).toFixed(1)+'%';
+
+  const upcoming=[...DATA].reverse().filter(d=>!flipped.has(d.id));
+  const targets=upcoming.slice(0,3).map(d=>d.id);
+  for(const [id,el] of cells) el.classList.toggle('target',targets.includes(id));
+
+  $('#qlist').innerHTML=upcoming.slice(0,14).map((d,i)=>{
+    const x=d.cap/Math.max(mc,1), pct=Math.min(100,mc/d.cap*100);
+    return `<div class="qrow${i===0?' first':''}" data-id="${d.id}">
+      <span class="qrank">${i+1}</span>${chipHTML(d)}
+      <div class="qbody">
+        <div class="qtop"><span class="qsym">${d.sym}</span><span class="qcap">${fmt(d.cap)}</span></div>
+        <div class="qname">${d.name} · ${fmt(d.cap-mc)} away</div>
+        <div class="qmeta"><div class="bar"><i style="width:${pct}%"></i></div><span class="qx">${xfmt(x)}</span></div>
+      </div>
+    </div>`;
+  }).join('') || '<div class="qrow"><div class="qname">everything flipped</div></div>';
+
+  // hero (MAIN view)
+  const hn=upcoming[0];
+  if(hn){
+    const pct=Math.min(100,mc/hn.cap*100);
+    $('#hbarFill').style.width=pct+'%';
+    $('#hbarGoal').textContent=hn.sym+' · '+fmt(hn.cap);
+    $('#hleft').innerHTML=`<b>${fmt(hn.cap-mc)}</b> left to flip ${hn.sym}`;
+  }else{
+    $('#hbarFill').style.width='100%';
+    $('#hbarGoal').textContent='—';
+    $('#hleft').textContent='everything flipped';
+  }
+  $('#hsub').innerHTML=`<b>${flipped.size}</b> of ${DATA.length} targets flipped · <b>${(flipped.size/DATA.length*100).toFixed(1)}%</b> of the world`;
+
+  renderLane(upcoming);
+
+  if(modalId) renderModal();
+  buildTape(upcoming);
+  if(filter==='flipped') layout();
+  else for(const d of DATA){const el=cells.get(d.id); if(el) paint(d,el);}
+}
+
+/* ================= simulation & live data ================= */
+
+/* ================= live market cap — on-chain via /api/mcap (Alchemy key stays server-side) ================= */
+const API=QS.get('api')||'/api/mcap';
+let feedBusy=false;
+async function poll(){
+  if(document.hidden||feedBusy) return;
+  feedBusy=true;
+  try{
+    const r=await fetch(API,{cache:'no-store'});
+    if(!r.ok) return;
+    const j=await r.json();
+    if(!(j.mc>0)) return;
+    if(!live){
+      live=true;
+      const b=$('#badge'); b.className='badge live'; b.textContent='LIVE · ON-CHAIN';
+      $('#simCtl').classList.add('hidden');
+    }
+    const prev=mc; mc=j.mc;
+    if(prev>0&&mc!==prev) (mc>prev?tickUp:tickDown)(Math.min(1,Math.abs(mc-prev)/prev*20));
+    update();
+  }catch(e){/* feed unreachable: stays pre-launch */}
+  finally{feedBusy=false;}
+}
+poll(); setInterval(poll,5000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden) poll();});
+
+/* ================= controls ================= */
+$('#slider').addEventListener('input',e=>{
+  scrubUntil=Date.now()+8000;
+  mc=Math.pow(10,+e.target.value);
+  update();
+});
+$('#tabs').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b) return;
+  filter=b.dataset.f;
+  try{history.replaceState(null,'','#'+filter);}catch(e){}
+  document.body.classList.toggle('main-view',filter==='main');
+  for(const x of $('#tabs').children) x.classList.toggle('on',x===b);
+  layout(); update();
+});
+$('#sound').addEventListener('click',()=>{
+  soundOn=!soundOn;
+  if(soundOn){ensureAudio();blip(783.99,.08,.15);}
+  $('#sound').classList.toggle('on',soundOn);
+});
+$('#caBtn').addEventListener('click',async()=>{
+  try{await navigator.clipboard.writeText(CA);}catch(e){}
+  toast(`${icon('check')} <span>contract address copied</span>`);
+});
+// clicking a queue row, ladder row or conquered chip opens the detail modal
+for(const sel of ['#qlist','#lane']){
+  $(sel).addEventListener('click',e=>{
+    const t=e.target.closest('[data-id]');
+    if(t){const d=DATA.find(x=>x.id===t.dataset.id); if(d) openModal(d);}
+  });
+}
+// hovering a queue row highlights its tile on the map
+$('#qlist').addEventListener('mouseover',e=>{
+  const row=e.target.closest('.qrow'); if(!row||!row.dataset.id) return;
+  const el=cells.get(row.dataset.id); if(el) el.classList.add('linked');
+});
+$('#qlist').addEventListener('mouseout',e=>{
+  const row=e.target.closest('.qrow'); if(!row||!row.dataset.id) return;
+  const el=cells.get(row.dataset.id); if(el) el.classList.remove('linked');
+});
+let rT;
+new ResizeObserver(()=>{clearTimeout(rT);rT=setTimeout(layout,100)}).observe(map);
+addEventListener('load',layout);
+
+/* ================= FLIP.TERMINAL hero ================= */
+const BUILT='__BUILT__';
+{
+  const minS=[...DATA].reverse().find(d=>d.type==='stock'), maxF=DATA.find(d=>d.type==='fx');
+  $('#loreMin').textContent=`a ${fmt(minS.cap)} ${minS.name.replace(/\s*\(.*\)/,'')} shell`;
+  $('#loreMax').textContent=`the ${fmt(maxF.cap)} ${maxF.name}`;
+}
+
+const flipLog=[];
+function logFlip(id){const i=flipLog.indexOf(id); if(i>-1) flipLog.splice(i,1); flipLog.unshift(id);}
+const lane=$('#lane'), laneCards=new Map();
+let laneFocus=null, laneLast=[];
+function laneCard(d){
+  const el=document.createElement('div'); el.className='lcard'; el.dataset.id=d.id;
+  el.innerHTML=`<div class="lc-lab"><i></i>next up</div>${chipHTML(d)}<div class="lc-sym">${d.sym}</div><div class="lc-name">${d.name.replace(/\s*\(.*\)/,'')}</div><div class="lc-cap">${fmt(d.cap)}</div><div class="lc-tag"></div><div class="lc-bar"><i></i></div>`;
+  return el;
+}
+function lanePos(off,W){
+  if(off===0) return {x:W/2,s:1,o:1,z:20};
+  const k=Math.abs(off), dir=off<0?-1:1;
+  return {x:W/2+dir*(218+(k-1)*90), s:Math.max(.4,.6-(k-1)*.07), o:Math.max(.2,.85-(k-1)*.22), z:20-k};
+}
+function placeCard(el,off,d){
+  const W=lane.clientWidth||600, p=lanePos(off,W);
+  el.style.setProperty('--x',p.x+'px');
+  el.style.transform=`translate(calc(${p.x}px - 50%),-50%) scale(${p.s})`;
+  el.style.opacity=p.o; el.style.zIndex=p.z;
+  const won=off>0;
+  el.classList.toggle('focus',off===0); el.classList.toggle('won',won);
+  el.querySelector('.lc-tag').textContent=won?'flipped ✓':xfmt(d.cap/Math.max(mc,1))+' away';
+  if(off===0) el.querySelector('.lc-bar i').style.width=Math.min(100,mc/d.cap*100)+'%';
+}
+function renderLane(upcoming){
+  laneLast=upcoming;
+  const W=lane.clientWidth||600;
+  const want=new Map();
+  upcoming.slice(0,4).forEach((d,i)=>want.set(d.id,{d,off:-i}));
+  flipLog.filter(id=>flipped.has(id)).slice(0,3).forEach((id,i)=>{const d=DATA.find(x=>x.id===id); if(d&&!want.has(id)) want.set(id,{d,off:i+1});});
+  for(const [id,el] of laneCards){ if(!want.has(id)){ laneCards.delete(id); el.classList.add('out'); setTimeout(()=>el.remove(),700);} }
+  for(const [id,{d,off}] of want){
+    let el=laneCards.get(id);
+    if(!el){
+      el=laneCard(d); laneCards.set(id,el); lane.appendChild(el);
+      const p=lanePos(off<=0?-5:5,W);              // enter from the far end of its side
+      el.style.transition='none';
+      el.style.transform=`translate(calc(${p.x}px - 50%),-50%) scale(${p.s})`; el.style.opacity=0;
+      void el.offsetWidth; el.style.transition='';
+    }
+    placeCard(el,off,d);
+  }
+  const f=upcoming[0]?upcoming[0].id:null;
+  if(f!==laneFocus){
+    const first=laneFocus===null; laneFocus=f;
+    const el=laneCards.get(f);
+    if(el&&!first){el.classList.remove('arrive'); void el.offsetWidth; el.classList.add('arrive');}
+  }
+  $('#laneWon').textContent=String(flipped.size).padStart(3,'0');
+}
+new ResizeObserver(()=>{if(laneLast.length) renderLane(laneLast);}).observe(lane);
+
+/* boot sequence — once per session, skippable */
+(function boot(){
+  if(filter!=='main'||REDUCED) return;
+  try{if(sessionStorage.getItem('flipBooted')) return;}catch(e){}
+  const el=$('#boot'), box=$('#bootLines'); let i=0, done=false;
+  const L=[
+    ['INITIALIZING FLIP.TERMINAL','acc'],
+    ['ESTABLISHING UPLINK TO ROBINHOOD CHAIN','ok','OK'],
+    ['TARGET.DATABASE','ok',DATA.length+' ENTITIES LOADED'],
+    ['LIVE.CAPS','ok','VERIFIED '+BUILT],
+    ['AUDIO.ENGINE','ok','ARMED'],
+    ['COMPANIES.STATUS','warn','PENDING FLIP'],
+    ['CURRENCIES.STATUS','warn','PENDING FLIP'],
+    ['ENTERING THE FLIPPENING','acc'],
+  ];
+  const finish=()=>{
+    if(done) return; done=true;
+    try{sessionStorage.setItem('flipBooted','1');}catch(e){}
+    el.classList.add('flash'); setTimeout(()=>el.classList.remove('on','flash'),520);
+    removeEventListener('keydown',finish);
+  };
+  const step=()=>{
+    if(done) return;
+    if(i>=L.length){setTimeout(finish,650);return;}
+    const [t,c,r]=L[i++];
+    box.insertAdjacentHTML('beforeend',`<div class="bl"><span class="t">${String(i).padStart(2,'0')}</span><span class="${c==='acc'?'acc':''}">${t}${r?'...':''}</span>${r?`<span class="${c}">${r}</span>`:''}${i===L.length?' <span class="caret"></span>':''}</div>`);
+    setTimeout(step,170+Math.random()*170);
+  };
+  el.classList.add('on');
+  el.addEventListener('click',finish); addEventListener('keydown',finish);
+  setTimeout(step,300);
+})();
+
+/* ================= hero particle field ================= */
+(function(){
+  const cv=$('#bgfx'); if(!cv.getContext||REDUCED) return;
+  const cx=cv.getContext('2d');
+  const size=()=>{cv.width=cv.clientWidth||1; cv.height=cv.clientHeight||1;};
+  new ResizeObserver(size).observe(cv); size();
+  const mk=()=>({x:Math.random()*cv.width, y:cv.height+12, r:.8+Math.random()*2.1,
+                 s:.12+Math.random()*.45, g:Math.random()<.72, o:.12+Math.random()*.35});
+  const P=Array.from({length:55},()=>({...mk(), y:Math.random()*cv.height}));
+  (function tick(){
+    if(document.body.classList.contains('main-view')&&!document.hidden&&cv.width>1){
+      cx.clearRect(0,0,cv.width,cv.height);
+      for(const p of P){
+        p.y-=p.s;
+        if(p.y<-12) Object.assign(p,mk());
+        cx.beginPath(); cx.arc(p.x,p.y,p.r,0,7);
+        cx.fillStyle=p.g?`rgba(18,230,149,${p.o})`:`rgba(255,215,94,${p.o})`;
+        cx.fill();
+      }
+    }
+    requestAnimationFrame(tick);
+  })();
+})();
+
+for(const x of $('#tabs').children) x.classList.toggle('on',x.dataset.f===filter);
+$('#caText').textContent=CA.slice(0,6)+'…'+CA.slice(-5);
+if(QS.has('sim')){ $('#simCtl').classList.remove('hidden'); $('#badge').textContent='SIM'; mc=Math.pow(10,+$('#slider').value); } // dev-only: ?sim shows the scrub slider
+layout(); update();
+</script>
+</body>
+</html>

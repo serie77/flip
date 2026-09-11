@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>FLIP brand art</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@900&family=IBM+Plex+Mono:wght@500;700&display=swap">
+<style>
+  *{box-sizing:border-box; margin:0}
+  html,body{height:100%; overflow:hidden; font-family:'Archivo',sans-serif}
+  body{
+    background:
+      radial-gradient(60% 55% at 16% 18%, rgba(18,230,149,.22), transparent 62%),
+      radial-gradient(55% 60% at 86% 88%, rgba(255,215,94,.16), transparent 62%),
+      radial-gradient(45% 45% at 74% 12%, rgba(96,72,200,.20), transparent 60%),
+      linear-gradient(180deg,#0c1322,#05070d);
+  }
+  .layer{position:absolute; inset:0; pointer-events:none}
+  .grid{background:radial-gradient(rgba(255,255,255,.07) 1px, transparent 1.2px) 0 0/28px 28px; mask-image:radial-gradient(70% 70% at 50% 50%, #000 30%, transparent 100%); -webkit-mask-image:radial-gradient(70% 70% at 50% 50%, #000 30%, transparent 100%)}
+  .grain{opacity:.06; mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+  .vig{background:radial-gradient(90% 90% at 50% 50%, transparent 60%, rgba(3,5,10,.55))}
+
+  /* ---- wordmark treatment ---- */
+  .wm{position:relative; font-weight:900; line-height:.9; letter-spacing:-.04em; white-space:nowrap; display:inline-block}
+  .wm .fill{
+    position:relative; z-index:2; color:transparent;
+    background:linear-gradient(180deg,#ffffff 0%,#f4f7fc 38%,#aebbdc 50%,#f7f9fe 56%,#c3cfea 100%);
+    -webkit-background-clip:text; background-clip:text;
+  }
+  .wm.em .fill{background:linear-gradient(180deg,#b6fbe0 0%,#12e695 48%,#0fbd7b 54%,#7cf0c4 62%,#0a9c66 100%); -webkit-background-clip:text; background-clip:text}
+  .wm .ghost{position:absolute; inset:0; z-index:1; color:transparent; -webkit-text-stroke:2px rgba(255,255,255,.22); transform:translate(.06em,.06em)}
+  .wm.em .ghost{-webkit-text-stroke-color:rgba(18,230,149,.35)}
+  .wm .glow{position:absolute; inset:0; z-index:0; color:rgba(18,230,149,.0); filter:blur(28px); opacity:.55}
+  .wm.em .glow{color:rgba(18,230,149,.5)}
+  .wm:not(.em) .glow{color:rgba(255,255,255,.18)}
+  .wm .refl{
+    position:absolute; left:0; right:0; top:100%; z-index:0; margin-top:.02em;
+    transform:scaleY(-1); transform-origin:top; color:rgba(255,255,255,.28); filter:blur(1.2px);
+    mask-image:linear-gradient(to bottom, rgba(0,0,0,.9), transparent 58%); -webkit-mask-image:linear-gradient(to bottom, rgba(0,0,0,.9), transparent 58%);
+  }
+  .wm.em .refl{color:rgba(18,230,149,.35)}
+  .fill em,.ghost em,.glow em,.refl em{font-style:normal}
+  .fill em{color:#12e695; background:none; -webkit-text-fill-color:#12e695}
+
+  .mono{font-family:'IBM Plex Mono',monospace; text-transform:uppercase}
+
+  /* ---- pfp ---- */
+  body.pfp .stack{position:absolute; left:50%; top:50%; transform:translate(-50%,-56%); display:flex; flex-direction:column; align-items:center; gap:0}
+  body.pfp .wm{font-size:36vmin}
+  body.pfp .sub{margin-top:14vmin; font-weight:700; font-size:3.2vmin; letter-spacing:.34em; padding-left:.34em; color:#ffd75e; text-shadow:0 0 24px rgba(255,215,94,.35)}
+  body.pfp .tick{position:absolute; left:50%; bottom:9%; transform:translateX(-50%); font-weight:500; font-size:2vmin; letter-spacing:.3em; color:#4a5570}
+
+  /* ---- banner ---- */
+  body.banner .text{position:absolute; left:6vw; top:50%; transform:translateY(-55%); display:flex; flex-direction:column; gap:2vh}
+  body.banner .eyebrow{font-weight:700; font-size:2.4vh; letter-spacing:.34em; color:#ffd75e; display:flex; gap:1.6vh; align-items:center}
+  body.banner .eyebrow i{width:1.3vh; height:1.3vh; border-radius:50%; background:#12e695; box-shadow:0 0 14px rgba(18,230,149,.9)}
+  body.banner .hl{display:flex; flex-direction:column; gap:0}
+  body.banner .wm{font-size:21vh}
+  body.banner .wm.em{margin-top:-.02em}
+  body.banner .hl .wm:not(:last-child) .refl{display:none}
+  body.banner .wm.em .ghost{-webkit-text-stroke-color:rgba(18,230,149,.22)}
+  body.banner .sub{margin-top:9vh; font-weight:500; font-size:2.7vh; letter-spacing:.16em; color:#9aa6c4}
+  body.banner .sub b{color:#f4f7fc; font-weight:700}
+  body.banner .big{
+    position:absolute; right:-2vw; top:50%; transform:translateY(-50%); font-weight:900; font-size:78vh; line-height:1; letter-spacing:-.05em;
+    color:transparent; -webkit-text-stroke:2px rgba(255,255,255,.10); white-space:nowrap;
+  }
+  body.banner .big em{font-style:normal; -webkit-text-stroke-color:rgba(18,230,149,.28)}
+  body.banner .ca{position:absolute; right:2.4vw; bottom:3.4vh; font-weight:500; font-size:2vh; letter-spacing:.24em; color:#4a5570}
+</style>
+</head>
+<body>
+<div class="layer grid"></div>
+<div id="ui"></div>
+<div class="layer vig"></div>
+<div class="layer grain"></div>
+<script>
+const mode=new URLSearchParams(location.search).get('mode')||'pfp';
+document.body.classList.add(mode);
+const wm=(txt,em)=>`<div class="wm ${em?'em':''}"><span class="glow">${txt}</span><span class="ghost">${txt}</span><span class="fill">${txt}</span><span class="refl">${txt}</span></div>`;
+const ui=document.getElementById('ui');
+if(mode==='pfp'){
+  ui.innerHTML=`<div class="stack">${wm('FL<em>I</em>P')}<div class="sub mono">flip the universe</div></div><div class="tick mono">$flip · robinhood chain</div>`;
+}else{
+  ui.innerHTML=`<div class="big">FL<em>I</em>P</div><div class="text">
+    <div class="eyebrow mono"><i></i>$flip · robinhood chain</div>
+    <div class="hl">${wm('FLIP THE')}${wm('UNIVERSE.',true)}</div>
+    <div class="sub mono"><b>every company.</b> <b>every currency.</b> one coin.</div>
+  </div><div class="ca mono">flip.terminal · live</div>`;
+}
+</script>
+</body>
+</html>

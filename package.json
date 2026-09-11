@@ -1,0 +1,14 @@
+{
+  "name": "flip-terminal",
+  "private": true,
+  "scripts": {
+    "build": "node build.js",
+    "dev": "node dev.js"
+  },
+  "dependencies": {
+    "js-sha3": "^0.9.3"
+  },
+  "devDependencies": {
+    "pngjs": "^7.0.0"
+  }
+}

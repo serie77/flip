@@ -1,0 +1,449 @@
+{
+ "verified": "2026-09-11",
+ "caps": {
+  "MSFT": {
+   "c": 3660000000000,
+   "u": "stocks/msft"
+  },
+  "NVDA": {
+   "c": 5270000000000,
+   "u": "stocks/nvda"
+  },
+  "AAPL": {
+   "c": 4770000000000,
+   "u": "stocks/aapl"
+  },
+  "GOOGL": {
+   "c": 4070000000000.0005,
+   "u": "stocks/googl"
+  },
+  "META": {
+   "c": 1640000000000,
+   "u": "stocks/meta"
+  },
+  "AMZN": {
+   "c": 2720000000000,
+   "u": "stocks/amzn"
+  },
+  "AVGO": {
+   "c": 1720000000000,
+   "u": "stocks/avgo"
+  },
+  "BRK.B": {
+   "c": 1090000000000.0001,
+   "u": "stocks/brk.b"
+  },
+  "TSLA": {
+   "c": 1440000000000,
+   "u": "stocks/tsla"
+  },
+  "ORCL": {
+   "c": 440540000000,
+   "u": "stocks/orcl"
+  },
+  "WMT": {
+   "c": 838830000000,
+   "u": "stocks/wmt"
+  },
+  "JPM": {
+   "c": 939830000000,
+   "u": "stocks/jpm"
+  },
+  "LLY": {
+   "c": 1000000000000,
+   "u": "stocks/lly"
+  },
+  "V": {
+   "c": 674050000000,
+   "u": "stocks/v"
+  },
+  "MA": {
+   "c": 495270000000,
+   "u": "stocks/ma"
+  },
+  "COST": {
+   "c": 400190000000,
+   "u": "stocks/cost"
+  },
+  "JNJ": {
+   "c": 641880000000,
+   "u": "stocks/jnj"
+  },
+  "NFLX": {
+   "c": 316500000000,
+   "u": "stocks/nflx"
+  },
+  "PLTR": {
+   "c": 398570000000,
+   "u": "stocks/pltr"
+  },
+  "XOM": {
+   "c": 679410000000,
+   "u": "stocks/xom"
+  },
+  "HD": {
+   "c": 304980000000,
+   "u": "stocks/hd"
+  },
+  "ABBV": {
+   "c": 450610000000,
+   "u": "stocks/abbv"
+  },
+  "BAC": {
+   "c": 437470000000,
+   "u": "stocks/bac"
+  },
+  "PG": {
+   "c": 332070000000,
+   "u": "stocks/pg"
+  },
+  "KO": {
+   "c": 377890000000,
+   "u": "stocks/ko"
+  },
+  "UNH": {
+   "c": 348520000000,
+   "u": "stocks/unh"
+  },
+  "GE": {
+   "c": 336330000000,
+   "u": "stocks/ge"
+  },
+  "CVX": {
+   "c": 417350000000,
+   "u": "stocks/cvx"
+  },
+  "WFC": {
+   "c": 270500000000,
+   "u": "stocks/wfc"
+  },
+  "TMUS": {
+   "c": 190030000000,
+   "u": "stocks/tmus"
+  },
+  "PM": {
+   "c": 295780000000,
+   "u": "stocks/pm"
+  },
+  "CRM": {
+   "c": 199990000000,
+   "u": "stocks/crm"
+  },
+  "CSCO": {
+   "c": 423590000000,
+   "u": "stocks/csco"
+  },
+  "AMD": {
+   "c": 822110000000,
+   "u": "stocks/amd"
+  },
+  "ABT": {
+   "c": 178850000000,
+   "u": "stocks/abt"
+  },
+  "MS": {
+   "c": 334000000000,
+   "u": "stocks/ms"
+  },
+  "IBM": {
+   "c": 220480000000,
+   "u": "stocks/ibm"
+  },
+  "AXP": {
+   "c": 216580000000,
+   "u": "stocks/axp"
+  },
+  "GS": {
+   "c": 308750000000,
+   "u": "stocks/gs"
+  },
+  "LIN": {
+   "c": 212800000000,
+   "u": "stocks/lin"
+  },
+  "MCD": {
+   "c": 179070000000,
+   "u": "stocks/mcd"
+  },
+  "MRK": {
+   "c": 357020000000,
+   "u": "stocks/mrk"
+  },
+  "DIS": {
+   "c": 182720000000,
+   "u": "stocks/dis"
+  },
+  "T": {
+   "c": 175080000000,
+   "u": "stocks/t"
+  },
+  "RTX": {
+   "c": 267019999999.99997,
+   "u": "stocks/rtx"
+  },
+  "PEP": {
+   "c": 186510000000,
+   "u": "stocks/pep"
+  },
+  "UBER": {
+   "c": 148210000000,
+   "u": "stocks/uber"
+  },
+  "INTU": {
+   "c": 83580000000,
+   "u": "stocks/intu"
+  },
+  "CAT": {
+   "c": 370040000000,
+   "u": "stocks/cat"
+  },
+  "VZ": {
+   "c": 207610000000,
+   "u": "stocks/vz"
+  },
+  "BKNG": {
+   "c": 130990000000.00002,
+   "u": "stocks/bkng"
+  },
+  "BA": {
+   "c": 161870000000,
+   "u": "stocks/ba"
+  },
+  "C": {
+   "c": 232320000000,
+   "u": "stocks/c"
+  },
+  "QCOM": {
+   "c": 188920000000,
+   "u": "stocks/qcom"
+  },
+  "SPGI": {
+   "c": 120980000000,
+   "u": "stocks/spgi"
+  },
+  "ADBE": {
+   "c": 98910000000,
+   "u": "stocks/adbe"
+  },
+  "TXN": {
+   "c": 236370000000,
+   "u": "stocks/txn"
+  },
+  "LOW": {
+   "c": 110300000000,
+   "u": "stocks/low"
+  },
+  "PFE": {
+   "c": 157600000000,
+   "u": "stocks/pfe"
+  },
+  "UNP": {
+   "c": 169770000000,
+   "u": "stocks/unp"
+  },
+  "HON": {
+   "c": 64080000000,
+   "u": "stocks/hon"
+  },
+  "NKE": {
+   "c": 54330000000,
+   "u": "stocks/nke"
+  },
+  "AMAT": {
+   "c": 360300000000,
+   "u": "stocks/amat"
+  },
+  "ISRG": {
+   "c": 127340000000,
+   "u": "stocks/isrg"
+  },
+  "HOOD": {
+   "c": 101890000000,
+   "u": "stocks/hood"
+  },
+  "COIN": {
+   "c": 45450000000,
+   "u": "stocks/coin"
+  },
+  "INTC": {
+   "c": 527130000000,
+   "u": "stocks/intc"
+  },
+  "SBUX": {
+   "c": 113090000000,
+   "u": "stocks/sbux"
+  },
+  "PYPL": {
+   "c": 45600000000,
+   "u": "stocks/pypl"
+  },
+  "GM": {
+   "c": 75570000000,
+   "u": "stocks/gm"
+  },
+  "CCL": {
+   "c": 30780000000,
+   "u": "stocks/ccl"
+  },
+  "UAL": {
+   "c": 34560000000,
+   "u": "stocks/ual"
+  },
+  "DAL": {
+   "c": 51170000000,
+   "u": "stocks/dal"
+  },
+  "F": {
+   "c": 55350000000,
+   "u": "stocks/f"
+  },
+  "NOK": {
+   "c": 60150000000,
+   "u": "stocks/nok"
+  },
+  "PINS": {
+   "c": 10640000000,
+   "u": "stocks/pins"
+  },
+  "RIVN": {
+   "c": 23240000000,
+   "u": "stocks/rivn"
+  },
+  "GME": {
+   "c": 10290000000,
+   "u": "stocks/gme"
+  },
+  "ROKU": {
+   "c": 22870000000,
+   "u": "stocks/roku"
+  },
+  "BB": {
+   "c": 4430000000,
+   "u": "stocks/bb"
+  },
+  "LCID": {
+   "c": 1650000000,
+   "u": "stocks/lcid"
+  },
+  "SNAP": {
+   "c": 9340000000,
+   "u": "stocks/snap"
+  },
+  "OPEN": {
+   "c": 2720000000,
+   "u": "stocks/open"
+  },
+  "DJT": {
+   "c": 2440000000,
+   "u": "stocks/djt"
+  },
+  "PTON": {
+   "c": 2160000000,
+   "u": "stocks/pton"
+  },
+  "AMC": {
+   "c": 2109999999.9999998,
+   "u": "stocks/amc"
+  },
+  "SNDL": {
+   "c": 333210000,
+   "u": "stocks/sndl"
+  },
+  "CHPT": {
+   "c": 239770000,
+   "u": "stocks/chpt"
+  },
+  "GNS": {
+   "c": 32100000,
+   "u": "stocks/gns"
+  },
+  "WKHS": {
+   "c": 33220000,
+   "u": "stocks/wkhs"
+  },
+  "ASTI": {
+   "c": 27730000,
+   "u": "stocks/asti"
+  },
+  "HCMC": {
+   "c": 527160,
+   "u": "quote/otc/HCMC"
+  },
+  "FFAI": {
+   "c": 6590000,
+   "u": "stocks/ffai"
+  },
+  "EEENF": {
+   "c": 19090000,
+   "u": "quote/otc/EEENF"
+  },
+  "CYBL": {
+   "c": 7440000,
+   "u": "quote/otc/CYBL"
+  },
+  "TOPS": {
+   "c": 4010000,
+   "u": "stocks/tops"
+  },
+  "OPTI": {
+   "c": 9490000,
+   "u": "quote/otc/OPTI"
+  },
+  "AABB": {
+   "c": 50330000,
+   "u": "quote/otc/AABB"
+  },
+  "NKLAQ": {
+   "c": 836040,
+   "u": "quote/otc/NKLAQ"
+  },
+  "RDAR": {
+   "c": 1600000,
+   "u": "quote/otc/RDAR"
+  },
+  "ILUS": {
+   "c": 323900,
+   "u": "quote/otc/ILUS"
+  },
+  "GVSI": {
+   "c": 423500,
+   "u": "quote/otc/GVSI"
+  },
+  "ENZC": {
+   "c": 2420000,
+   "u": "quote/otc/ENZC"
+  },
+  "OZSC": {
+   "c": 123830,
+   "u": "quote/otc/OZSC"
+  },
+  "PHIL": {
+   "c": 46870,
+   "u": "quote/otc/PHIL"
+  },
+  "BBIG": {
+   "c": 70210,
+   "u": "quote/otc/BBIG"
+  },
+  "SNPW": {
+   "c": 32720,
+   "u": "quote/otc/SNPW"
+  },
+  "TONR": {
+   "c": 12510,
+   "u": "quote/otc/TONR"
+  },
+  "MMATQ": {
+   "c": 7,
+   "u": "quote/otc/MMATQ"
+  },
+  "SIRC": {
+   "c": 12370,
+   "u": "quote/otc/SIRC"
+  },
+  "ALPP": {
+   "c": 2710,
+   "u": "quote/otc/ALPP"
+  }
+ }
+}
