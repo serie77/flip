@@ -11,6 +11,18 @@ const stocks = [...tpl.matchAll(/\bS\('([^']+)'/g)].map(m => m[1]);
 const fx = [...tpl.matchAll(/\bF\('([^']+)'/g)].map(m => m[1]);
 
 const FLAG_OVERRIDES = { XOF: null, XAF: null, XCD: 'kn', XCG: 'cw', XPF: 'pf' };
+const fav = d => `https://www.google.com/s2/favicons?domain=${d}&sz=128`;
+// hand-verified sources for names the logo CDNs don't cover (company favicons, Wikimedia logos)
+const LOGO_OVERRIDES = {
+  NKLAQ: ['https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f2/Nikola_Motor_Company_logo.svg/330px-Nikola_Motor_Company_logo.svg.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail'],
+  AABB: [fav('asiabroadbandinc.com')],
+  FFAI: ['https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Faraday_Future_logo.svg/330px-Faraday_Future_logo.svg.png', fav('ff.com')],
+};
+// currency unions with no flag: central-bank logos (rendered "contain" on a white chip)
+const FX_LOGO_OVERRIDES = {
+  XOF: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/Central_Bank_of_West_African_States_wordmark.svg/330px-Central_Bank_of_West_African_States_wordmark.svg.png',
+  XAF: 'https://upload.wikimedia.org/wikipedia/en/thumb/6/63/Bank_of_Central_African_States_logo.svg/330px-Bank_of_Central_African_States_logo.svg.png',
+};
 
 // hand-made SVG chips for entries that have no real-world image
 const svgChip = (label, fg) => 'data:image/svg+xml;utf8,' + encodeURIComponent(
@@ -42,7 +54,7 @@ async function fetchImg(url) {
   const ctl = new AbortController();
   const t = setTimeout(() => ctl.abort(), 8000);
   try {
-    const r = await fetch(url, { signal: ctl.signal, redirect: 'follow' });
+    const r = await fetch(url, { signal: ctl.signal, redirect: 'follow', headers: { 'user-agent': 'FlipSite/1.0 (build script)' } });
     if (!r.ok) return null;
     const type = (r.headers.get('content-type') || '').split(';')[0].trim();
     if (!type.startsWith('image/')) return null;
@@ -60,6 +72,7 @@ async function stockLogo(sym) {
   if (sym.includes('·')) return { uri: svgChip('OTC', '#8fa2c9'), cls: 'full' };
   const variants = [...new Set([sym, sym.replace('.', '-'), sym.split('.')[0]])];
   const urls = [
+    ...(LOGO_OVERRIDES[sym] || []),
     ...variants.map(v => `https://cdn.jsdelivr.net/gh/nvstly/icons@main/ticker_icons/${v}.png`),
     `https://financialmodelingprep.com/image-stock/${sym}.png`,
   ];
@@ -112,7 +125,11 @@ async function liveCap(sym) {
 }
 
 async function flagImg(sym) {
-  if (sym === 'XOF' || sym === 'XAF') return { uri: svgChip('CFA', '#ffd75e') };
+  if (FX_LOGO_OVERRIDES[sym]) {
+    const got = await fetchImg(FX_LOGO_OVERRIDES[sym]);
+    if (got) return { uri: got.uri, cls: 'contain' };
+    return { uri: svgChip('CFA', '#ffd75e') };
+  }
   const cc = sym in FLAG_OVERRIDES ? FLAG_OVERRIDES[sym] : sym.slice(0, 2).toLowerCase();
   if (!cc) return null;
   const got = await fetchImg(`https://flagcdn.com/w40/${cc}.png`);
